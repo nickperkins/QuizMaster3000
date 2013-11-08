@@ -9,3 +9,19 @@ commands:
       permission: quizmaster3000.quiz
       permission-message: You don't have <permission>
       usage: Type /<command> help for more details!
+  quizadmin:
+      description: QuizMaster3000 Admin
+      aliases: [triviaadmin]
+      permission: quizmaster3000.admin
+      permission-message: You don't have <permission>
+      usage: Type /<command> help for more details!
+   
+      
+permissions:
+  quizmaster3000.quiz:
+    description: QuizMaster300 Player Commands
+    default: true
+  quizmaster3000.admin:
+    description: QuizMaster300 Admin Commands
+    default: op
+   

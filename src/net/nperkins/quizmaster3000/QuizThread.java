@@ -81,7 +81,7 @@ public class QuizThread implements Runnable {
 						plugin.getServer().broadcastMessage(Util.formatMessage("%s%s: %d points!", ChatColor.GOLD, score.getKey().getName(), score.getValue()));
 					}
 				}
-				plugin.scores = new HashMap<>();
+				plugin.scores = new HashMap<Player, Integer>();
 				this.stop();
 				break;
 			case REGISTRATION:
