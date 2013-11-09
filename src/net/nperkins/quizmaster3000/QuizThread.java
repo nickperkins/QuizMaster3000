@@ -82,7 +82,7 @@ public class QuizThread implements Runnable {
 					}
 				}
 				plugin.scores = new HashMap<Player, Integer>();
-				this.stop();
+				t = null;
 				break;
 			case REGISTRATION:
 				plugin.getServer().broadcastMessage(Util.formatMessage("%sA new game of quiz has started. Type /quiz join to play! We start in 1 minute.", ChatColor.GOLD));

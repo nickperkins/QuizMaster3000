@@ -68,13 +68,15 @@ public class QuizMaster3000 extends JavaPlugin {
 
 		// Register Listener
 		getServer().getPluginManager().registerEvents(listener, this);
-
-		Bukkit.getLogger().info("Welcome to the revolution!");
 	}
 
 	@Override
 	public void onDisable() {
-		Bukkit.getLogger().info("The revolution will be seeing you!");
+		
+		// If quiz thread is running, better stop it
+		if (thread.isRunning()) {
+			stopQuiz();
+		}
 	}
 
 	public void startQuiz() {
