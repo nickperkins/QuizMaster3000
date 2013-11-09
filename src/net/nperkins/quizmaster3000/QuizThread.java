@@ -2,19 +2,19 @@ package net.nperkins.quizmaster3000;
 
 /* This file is part of QuizMaster3000.
 
-QuizMaster3000 is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ QuizMaster3000 is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-QuizMaster3000 is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ QuizMaster3000 is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with QuizMaster3000.  If not, see <http://www.gnu.org/licenses/>. 
-*/
+ You should have received a copy of the GNU General Public License
+ along with QuizMaster3000.  If not, see <http://www.gnu.org/licenses/>. 
+ */
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -92,12 +92,17 @@ public class QuizThread implements Runnable {
 					Thread.sleep(1000 * 20);
 					plugin.getServer().broadcastMessage(Util.formatMessage("%s10 seconds until we start. Type /quiz join to play!", ChatColor.GOLD));
 					Thread.sleep(1000 * 10);
-					plugin.getServer().broadcastMessage(Util.formatMessage("%sJust type your answers into chat. Ready? Let's play!", ChatColor.GOLD));
-					Thread.sleep(1000 * 5);
+					if (plugin.scores.size() == 0) {
+						plugin.getServer().broadcastMessage(Util.formatMessage("%sNo players joined the game. Maybe next time?", ChatColor.GOLD));
+						plugin.state = QuizState.FINISHED;
+					} else {
+						plugin.getServer().broadcastMessage(Util.formatMessage("%sJust type your answers into chat. Ready? Let's play!", ChatColor.GOLD));
+						Thread.sleep(1000 * 5);
+						plugin.state = QuizState.ASKQUESTION;
+					}
 				} catch (InterruptedException e) {
 					break;
 				}
-				plugin.state = QuizState.ASKQUESTION;
 				break;
 			case ASKQUESTION:
 				Random ran = new Random();
@@ -124,7 +129,13 @@ public class QuizThread implements Runnable {
 			case GETANSWER:
 				plugin.getServer().broadcastMessage(Util.formatMessage("%sTime's up!", ChatColor.RED));
 				plugin.getServer().broadcastMessage(Util.formatMessage("%sThe correct answer was: %s", ChatColor.GOLD, StringUtils.join(Arrays.copyOfRange(plugin.currentQuestion.getAnswer(), 0, plugin.currentQuestion.getAnswer().length), " or ")));
-				plugin.state = QuizState.WAITFORNEXT;
+				if (plugin.scores.size() == 0) {
+					plugin.getServer().broadcastMessage(Util.formatMessage("%sSeems all the players from this round have left. No point going on, is there?", ChatColor.GOLD));
+					plugin.state = QuizState.FINISHED;
+				} else {
+					plugin.state = QuizState.WAITFORNEXT;
+				}
+
 				break;
 			case WAITFORNEXT:
 				plugin.getServer().broadcastMessage(Util.formatMessage("%sOK, Next Question...", ChatColor.GOLD));
