@@ -13,7 +13,7 @@ package net.nperkins.quizmaster3000;
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with QuizMaster3000.  If not, see <http://www.gnu.org/licenses/>. 
+ along with QuizMaster3000.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 import java.util.Arrays;
@@ -29,12 +29,16 @@ import org.bukkit.entity.Player;
 public class QuizThread implements Runnable {
 
 	private Thread t = null;
-
 	private QuizMaster3000 plugin = null;
+    private Boolean autoRun = false;
 
 	QuizThread(QuizMaster3000 plugin) {
 		this.plugin = plugin;
 	}
+
+    public void setAutoRun(Boolean autoRun) {
+        this.autoRun = autoRun;
+    }
 
 	public void start() {
 		t = new Thread(this);
@@ -53,6 +57,7 @@ public class QuizThread implements Runnable {
 	}
 
 	public void stop() {
+        setAutoRun(false);
 		t.interrupt();
 		t = null;
 
@@ -60,6 +65,10 @@ public class QuizThread implements Runnable {
 
 	public boolean isRunning() {
         return t != null;
+    }
+
+    public boolean isAutoRun() {
+        return autoRun;
     }
 
 	@Override
@@ -79,6 +88,16 @@ public class QuizThread implements Runnable {
 					}
 				}
 				plugin.scores = new HashMap<Player, Integer>();
+                if (this.isAutoRun()) {
+                    try {
+                        plugin.getServer().broadcastMessage(plugin.formatMessage("%sWe'll be back soon!", ChatColor.GOLD));
+                        Thread.sleep(plugin.config.getInt("autorun.delay") * 1000);
+                        plugin.state = QuizState.REGISTRATION;
+                        break;
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+            }
 				t = null;
 				break;
 			case REGISTRATION:
@@ -149,5 +168,6 @@ public class QuizThread implements Runnable {
 		}
 
 	}
+
 
 }

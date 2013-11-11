@@ -82,6 +82,15 @@ public class QuizMaster3000 extends JavaPlugin {
 		}
 	}
 
+    public void startAutoQuiz() {
+        if (!thread.isRunning()) {
+            thread.setAutoRun(true);
+            state = QuizState.REGISTRATION;
+            thread.start();
+        }
+
+    }
+
 	public void stopQuiz() {
 		state = QuizState.FINISHED;
 		thread.stop();
@@ -139,4 +148,6 @@ public class QuizMaster3000 extends JavaPlugin {
         message = ChatColor.translateAlternateColorCodes('&', config.getString("prefix") + " " + String.format(message, args));
         return message;
     }
+
+
 }

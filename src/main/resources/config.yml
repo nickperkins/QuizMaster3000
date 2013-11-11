@@ -1,2 +1,4 @@
 prefix: "&d[Quiz]&f"
 winningScore: 5
+autorun:
+  delay: 300

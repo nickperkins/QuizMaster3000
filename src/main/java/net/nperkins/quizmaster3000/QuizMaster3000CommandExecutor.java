@@ -86,6 +86,14 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
 				}
 				return true;
 			}
+            if (args[0].equalsIgnoreCase("autorun")) {
+                if (plugin.state == QuizState.FINISHED) {
+                    plugin.startAutoQuiz();
+                } else {
+                    sender.sendMessage(plugin.formatMessage("There is already a quiz game started."));
+                }
+                return true;
+            }
 
 		}
 
