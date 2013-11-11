@@ -41,7 +41,7 @@ public class QuizMaster3000Listener implements Listener {
 					if (event.getMessage().equalsIgnoreCase(a)) {
 						plugin.getServer().broadcastMessage(String.format("%sCorrect, %s!", ChatColor.GREEN, player.getName()));
 						plugin.scores.put(player, plugin.scores.get(player) + 1);
-						if (plugin.scores.get(player) == 5) {
+						if (plugin.scores.get(player) == plugin.config.getInt("winningScore")) {
 							plugin.thread.endQuiz();
 						} else {
 							plugin.thread.nextQuestion();

@@ -1,6 +1,6 @@
 name: QuizMaster3000
 main: net.nperkins.quizmaster3000.QuizMaster3000
-version: 0.1
+version: 0.2
 
 commands:
   quiz:

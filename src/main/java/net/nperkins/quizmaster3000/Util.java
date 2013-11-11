@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 
@@ -52,12 +51,8 @@ public class Util {
       
         return sortedMap;
     }
-	
-	public static String formatMessage(String message, Object... args) {
-		String prefix = "&d[Quiz]&f "; //TODO: Configuration item
-		message = ChatColor.translateAlternateColorCodes('&', prefix + String.format(message, args)); 
-		return message;
-	}
+
+
 
 
 }

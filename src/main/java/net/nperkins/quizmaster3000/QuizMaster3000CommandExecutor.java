@@ -44,22 +44,22 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
 		if (args.length > 0) {
 			if (args[0].equalsIgnoreCase("join")) {
 				if (!(sender instanceof Player)) {
-					sender.sendMessage(Util.formatMessage("This is for players only!"));
+					sender.sendMessage(plugin.formatMessage("This is for players only!"));
 				} else {
 					if (plugin.state == QuizState.REGISTRATION) {
 						if (plugin.scores.containsKey((Player) sender)) {
-							sender.sendMessage(Util.formatMessage("You have already joined this quiz round!"));
+							sender.sendMessage(plugin.formatMessage("You have already joined this quiz round!"));
 							return true;
 						} else {
 							plugin.scores.put((Player) sender, 0);
-							sender.sendMessage(Util.formatMessage("You have been added to the quiz!"));
+							sender.sendMessage(plugin.formatMessage("You have been added to the quiz!"));
 							return true;
 						}
 					} else if (plugin.state != QuizState.FINISHED) {
-						sender.sendMessage(Util.formatMessage("The current quiz has already started."));
+						sender.sendMessage(plugin.formatMessage("The current quiz has already started."));
 						return true;
 					} else {
-						sender.sendMessage(Util.formatMessage("There is no quiz game running."));
+						sender.sendMessage(plugin.formatMessage("There is no quiz game running."));
 					}
 					return true;
 				}
@@ -74,7 +74,7 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
 				if (plugin.state == QuizState.FINISHED) {
 					plugin.startQuiz();
 				} else {
-					sender.sendMessage(Util.formatMessage("There is already a quiz game started."));
+					sender.sendMessage(plugin.formatMessage("There is already a quiz game started."));
 				}
 				return true;
 			}
@@ -82,7 +82,7 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
 				if (plugin.state != QuizState.FINISHED) {
 					plugin.stopQuiz();
 				} else {
-					sender.sendMessage(Util.formatMessage("There is no quiz game running."));
+					sender.sendMessage(plugin.formatMessage("There is no quiz game running."));
 				}
 				return true;
 			}

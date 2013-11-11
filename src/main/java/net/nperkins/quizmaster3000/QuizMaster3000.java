@@ -16,25 +16,21 @@ package net.nperkins.quizmaster3000;
  along with QuizMaster3000.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class QuizMaster3000 extends JavaPlugin {
 
-	private QuizMaster3000CommandExecutor commandExecutor = new QuizMaster3000CommandExecutor(this);
-	private QuizMaster3000Listener listener = new QuizMaster3000Listener(this);
+	private final QuizMaster3000CommandExecutor commandExecutor = new QuizMaster3000CommandExecutor(this);
+	private final QuizMaster3000Listener listener = new QuizMaster3000Listener(this);
 
 	public QuizThread thread = new QuizThread(this);
 	volatile public QuizState state = QuizState.FINISHED;
@@ -43,15 +39,15 @@ public class QuizMaster3000 extends JavaPlugin {
 	public ArrayList<Question> questions = new ArrayList<Question>();
 	public Question currentQuestion = null;
 
+    public FileConfiguration config = null;
+
 	@Override
 	public void onEnable() {
 
-		// this.saveDefaultConfig();
+		this.saveDefaultConfig();
 
-		// Create data folder if required
-		if (!this.getDataFolder().exists()) {
-			this.getDataFolder().mkdir();
-		}
+        this.config = this.getConfig();
+
 
 		String quizfilepath = this.getDataFolder() + File.separator + "questions.dat";
 
@@ -90,32 +86,31 @@ public class QuizMaster3000 extends JavaPlugin {
 		state = QuizState.FINISHED;
 		thread.stop();
 		this.scores = new HashMap<Player, Integer>();
-		getServer().broadcastMessage(Util.formatMessage("%sQuiz Ended!",ChatColor.GOLD));
+		getServer().broadcastMessage(formatMessage("%sQuiz Ended!", ChatColor.GOLD));
 		
 	}
 
-	private void checkQuestions(String filepath) {
+	private void checkQuestions(String filePath) {
 
-		File quizfile = new File(filepath);
-		if (!quizfile.exists()) {
-			Bukkit.getLogger().info(Util.formatMessage("%sQuiz data file does not exist - providing default questions.", ChatColor.GOLD));
+		File quizFile = new File(filePath);
+		if (!quizFile.exists()) {
+			Bukkit.getLogger().info(formatMessage("%sQuiz data file does not exist - providing default questions.", ChatColor.GOLD));
 
-			File file = new File("newname.ext");
-			if (!file.exists()) {
-				try {
-					quizfile.createNewFile();
-					InputStream in = (getClass().getResourceAsStream("/questions.dat"));
-					FileOutputStream out = new FileOutputStream(quizfile);
-					byte[] buffer = new byte[1024];
-					int len;
-					while ((len = in.read(buffer)) != -1) {
-						out.write(buffer, 0, len);
-					}
-					out.close();
-				} catch (IOException e) {
-					// no quiz
-				}
-			}
+			if (!quizFile.exists()) {
+                try {
+                    quizFile.createNewFile();
+                    InputStream in = (getClass().getResourceAsStream("/questions.dat"));
+                    FileOutputStream out = new FileOutputStream(quizFile);
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, len);
+                    }
+                    out.close();
+                } catch (IOException e) {
+                    // no quiz
+                }
+            }
 		}
 	}
 
@@ -124,13 +119,24 @@ public class QuizMaster3000 extends JavaPlugin {
 		BufferedReader br = new BufferedReader(new FileReader(quizfilepath));
 		String line;
 		while ((line = br.readLine()) != null) {
-			String[] splitline = line.split("\\|");
-			Question thisline = new Question();
-			thisline.setQuestion(splitline[0]);
-			thisline.setAnswer((String[]) ArrayUtils.subarray(splitline, 1, splitline.length));
-			questions.add(thisline);
+			String[] splitLine = line.split("\\|");
+			Question thisLine = new Question();
+			thisLine.setQuestion(splitLine[0]);
+			thisLine.setAnswer((String[]) ArrayUtils.subarray(splitLine, 1, splitLine.length));
+			questions.add(thisLine);
 		}
 		br.close();
 	}
 
+
+    /**
+     * Returns a formatted string using the specified string format prefixed with the configured prefix.
+     * @param message  A format string
+     * @param args  Arguments referenced by the format specifiers in the format string. If there are more arguments than format specifiers, the extra arguments are ignored. The number of arguments is variable and may be zero.
+     * @return A formatted string
+     */
+    public String formatMessage(String message, Object... args) {
+        message = ChatColor.translateAlternateColorCodes('&', config.getString("prefix") + " " + String.format(message, args));
+        return message;
+    }
 }
