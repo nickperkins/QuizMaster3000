@@ -127,7 +127,7 @@ public class QuizThread implements Runnable {
 					thisNumber = ran.nextInt(plugin.questions.size());
 				} while (thisNumber.equals(lastNumber));
 				lastNumber = thisNumber;
-				plugin.currentQuestion = plugin.questions.get(ran.nextInt(thisNumber));
+				plugin.currentQuestion = plugin.questions.get(thisNumber);
 				plugin.getServer().broadcastMessage(plugin.formatMessage("%sQuestion: " + plugin.currentQuestion.getQuestion(), ChatColor.GOLD));
 				plugin.state = QuizState.GETANSWER;
 				try {
