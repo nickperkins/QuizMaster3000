@@ -33,25 +33,11 @@ public class QuizMaster3000Listener implements Listener {
 
 	@EventHandler
 	public void onPlayerChat(AsyncPlayerChatEvent event) {
-		Player player = event.getPlayer();
 
-		if (plugin.state == QuizState.GETANSWER) {
-			if (plugin.scores.containsKey(player)) {
-				for (String a: plugin.currentQuestion.getAnswer()) {
-					if (event.getMessage().equalsIgnoreCase(a)) {
-						plugin.getServer().broadcastMessage(String.format("%sCorrect, %s!", ChatColor.GREEN, player.getName()));
-						plugin.scores.put(player, plugin.scores.get(player) + 1);
-						if (plugin.scores.get(player) == plugin.config.getInt("winningScore")) {
-							plugin.thread.endQuiz();
-						} else {
-							plugin.thread.nextQuestion();
-						}
-					}		
-				}
-
-
-			}
-		}
+        if(event.isAsynchronous())
+            plugin.getServer().getScheduler().callSyncMethod(plugin, new CallableCheckAnswer(event.getPlayer(), plugin, event.getMessage()));
+        else
+            plugin.checkAnswer(event.getPlayer(), event.getMessage());
 	}
 
 	@EventHandler
@@ -61,4 +47,5 @@ public class QuizMaster3000Listener implements Listener {
 			plugin.scores.remove(player);
 		}
 	}
+
 }
