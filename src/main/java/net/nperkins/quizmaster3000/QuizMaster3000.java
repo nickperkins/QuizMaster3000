@@ -34,8 +34,8 @@ public class QuizMaster3000 extends JavaPlugin {
 
     public QuizThread thread = new QuizThread(this);
     volatile public QuizState state = QuizState.FINISHED;
+    volatile HashMap<Player, Integer> scores = new HashMap<Player, Integer>();
 
-    public HashMap<Player, Integer> scores = new HashMap<Player, Integer>();
     public ArrayList<Question> questions = new ArrayList<Question>();
     public Question currentQuestion = null;
 
@@ -47,7 +47,6 @@ public class QuizMaster3000 extends JavaPlugin {
         this.saveDefaultConfig();
 
         this.config = this.getConfig();
-
 
         String quizfilepath = this.getDataFolder() + File.separator + "questions.dat";
 
@@ -93,8 +92,7 @@ public class QuizMaster3000 extends JavaPlugin {
 
     public void stopQuiz() {
         state = QuizState.FINISHED;
-        thread.stop();
-        this.scores = new HashMap<Player, Integer>();
+        thread.endQuiz();
         getServer().broadcastMessage(formatMessage("%sQuiz Ended!", ChatColor.GOLD));
 
     }
@@ -170,6 +168,4 @@ public class QuizMaster3000 extends JavaPlugin {
             }
         }
     }
-
-
 }

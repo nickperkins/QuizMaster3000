@@ -4,15 +4,14 @@ import org.bukkit.entity.Player;
 
 import java.util.concurrent.Callable;
 
-public class CallableCheckAnswer implements Callable {
+public class CallableCheckAnswer implements Callable<Object> {
 
     private Player player;
     private QuizMaster3000 plugin;
     private String message;
 
 
-    CallableCheckAnswer(Player p, QuizMaster3000 pl, String m)
-    {
+    CallableCheckAnswer(Player p, QuizMaster3000 pl, String m) {
         player = p;
         plugin = pl;
         message = m;

@@ -23,69 +23,69 @@ import org.bukkit.entity.Player;
 
 public class QuizMaster3000CommandExecutor implements CommandExecutor {
 
-	private QuizMaster3000 plugin;
+    private QuizMaster3000 plugin;
 
-	public QuizMaster3000CommandExecutor(QuizMaster3000 plugin) {
-		this.plugin = plugin;
-	}
+    public QuizMaster3000CommandExecutor(QuizMaster3000 plugin) {
+        this.plugin = plugin;
+    }
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (cmd.getName().equalsIgnoreCase("quiz")) {
-			return commandQuiz(sender, args);
-		}
-		if (cmd.getName().equalsIgnoreCase("quizadmin")) {
-			return commandQuizAdmin(sender, args);
-		}
-		return false;
-	}
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("quiz")) {
+            return commandQuiz(sender, args);
+        }
+        if (cmd.getName().equalsIgnoreCase("quizadmin")) {
+            return commandQuizAdmin(sender, args);
+        }
+        return false;
+    }
 
-	public boolean commandQuiz(CommandSender sender, String[] args) {
-		if (args.length > 0) {
-			if (args[0].equalsIgnoreCase("join")) {
-				if (!(sender instanceof Player)) {
-					sender.sendMessage(plugin.formatMessage("This is for players only!"));
-				} else {
-					if (plugin.state == QuizState.REGISTRATION) {
-						if (plugin.scores.containsKey((Player) sender)) {
-							sender.sendMessage(plugin.formatMessage("You have already joined this quiz round!"));
-							return true;
-						} else {
-							plugin.scores.put((Player) sender, 0);
-							sender.sendMessage(plugin.formatMessage("You have been added to the quiz!"));
-							return true;
-						}
-					} else if (plugin.state != QuizState.FINISHED) {
-						sender.sendMessage(plugin.formatMessage("The current quiz has already started."));
-						return true;
-					} else {
-						sender.sendMessage(plugin.formatMessage("There is no quiz game running."));
-					}
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    public boolean commandQuiz(CommandSender sender, String[] args) {
+        if (args.length > 0) {
+            if (args[0].equalsIgnoreCase("join")) {
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage(plugin.formatMessage("This is for players only!"));
+                } else {
+                    if (plugin.state == QuizState.REGISTRATION) {
+                        if (plugin.scores.containsKey((Player) sender)) {
+                            sender.sendMessage(plugin.formatMessage("You have already joined this quiz round!"));
+                            return true;
+                        } else {
+                            plugin.scores.put((Player) sender, 0);
+                            sender.sendMessage(plugin.formatMessage("You have been added to the quiz!"));
+                            return true;
+                        }
+                    } else if (plugin.state != QuizState.FINISHED) {
+                        sender.sendMessage(plugin.formatMessage("The current quiz has already started."));
+                        return true;
+                    } else {
+                        sender.sendMessage(plugin.formatMessage("There is no quiz game running."));
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-	public boolean commandQuizAdmin(CommandSender sender, String[] args) {
-		if (args.length > 0) {
-			if (args[0].equalsIgnoreCase("start")) {
-				if (plugin.state == QuizState.FINISHED) {
-					plugin.startQuiz();
-				} else {
-					sender.sendMessage(plugin.formatMessage("There is already a quiz game started."));
-				}
-				return true;
-			}
-			if (args[0].equalsIgnoreCase("stop")) {
-				if (plugin.state != QuizState.FINISHED) {
-					plugin.stopQuiz();
-				} else {
-					sender.sendMessage(plugin.formatMessage("There is no quiz game running."));
-				}
-				return true;
-			}
+    public boolean commandQuizAdmin(CommandSender sender, String[] args) {
+        if (args.length > 0) {
+            if (args[0].equalsIgnoreCase("start")) {
+                if (plugin.state == QuizState.FINISHED) {
+                    plugin.startQuiz();
+                } else {
+                    sender.sendMessage(plugin.formatMessage("There is already a quiz game started."));
+                }
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("stop")) {
+                if (plugin.state != QuizState.FINISHED) {
+                    plugin.stopQuiz();
+                } else {
+                    sender.sendMessage(plugin.formatMessage("There is no quiz game running."));
+                }
+                return true;
+            }
             if (args[0].equalsIgnoreCase("autorun")) {
                 if (plugin.state == QuizState.FINISHED) {
                     plugin.startAutoQuiz();
@@ -95,8 +95,8 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
                 return true;
             }
 
-		}
+        }
 
-		return false;
-	}
+        return false;
+    }
 }

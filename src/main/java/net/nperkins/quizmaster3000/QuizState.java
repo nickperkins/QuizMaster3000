@@ -17,5 +17,5 @@ along with QuizMaster3000.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 public enum QuizState {
-	REGISTRATION, ASKQUESTION, GETANSWER, WAITFORNEXT, FINISHED, 
+    REGISTRATION, ASKQUESTION, GETANSWER, WAITFORNEXT, FINISHED,
 }
