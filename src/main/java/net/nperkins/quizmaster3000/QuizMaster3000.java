@@ -17,6 +17,7 @@ package net.nperkins.quizmaster3000;
  */
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -26,6 +27,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 
 public class QuizMaster3000 extends JavaPlugin {
 
@@ -35,10 +38,9 @@ public class QuizMaster3000 extends JavaPlugin {
     public QuizThread thread = new QuizThread(this);
     volatile public QuizState state = QuizState.FINISHED;
     volatile HashMap<Player, Integer> scores = new HashMap<Player, Integer>();
+    volatile public Question currentQuestion = null;
 
     public ArrayList<Question> questions = new ArrayList<Question>();
-    public Question currentQuestion = null;
-
     public FileConfiguration config = null;
 
     @Override
@@ -163,9 +165,41 @@ public class QuizMaster3000 extends JavaPlugin {
                         }
                     }
                 }
-
-
             }
         }
+    }
+
+
+    public static String createHint(String[] answer, Integer percent) {
+
+        List<String> hint = new ArrayList<String>();
+
+
+        for (String s : answer) {
+
+            char[] a = s.toCharArray();
+            if (a.length > 4) {
+                Random r = new Random();
+                Integer charToReplace = Math.round((float) a.length * (percent / 100f));
+                List<Integer> replacedIndexes = new ArrayList<Integer>();
+                while (replacedIndexes.size() < charToReplace) {
+                    Integer index;
+                    do {
+                        index = r.nextInt(a.length);
+                    } while ((a[index] == ' ') || replacedIndexes.contains(index));
+                    a[index] = '*';
+                    replacedIndexes.add(index);
+                }
+
+            } else {
+                for (int i = 0; i < a.length; i++) {
+                    if (a[i] == ' ') a[i] = '*';
+                }
+
+            }
+            hint.add(new String(a));
+        }
+
+        return StringUtils.join(hint, " or ");
     }
 }

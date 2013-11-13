@@ -82,18 +82,18 @@ public class QuizThread implements Runnable {
 
             switch (plugin.state) {
                 case FINISHED:
-                    plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
-                        public void run() {
-                            if (!(plugin.scores.size() == 0)) {
-                                Map<Player, Integer> sortedScores = Util.sortScores(plugin.scores);
-                                plugin.getServer().broadcastMessage(plugin.formatMessage("%sScores!", ChatColor.GOLD));
-                                for (Entry<Player, Integer> score : sortedScores.entrySet()) {
-                                    plugin.getServer().broadcastMessage(plugin.formatMessage( "%s%s: %d points!", ChatColor.GOLD, score.getKey().getName(), score.getValue()));
-                                }
+                    synchronized (plugin.scores) {
+                        if (plugin.scores.size() != 0) {
+                            Map<Player, Integer> sortedScores = Util.sortScores(plugin.scores);
+                            plugin.getServer().broadcastMessage(plugin.formatMessage("%sScores!", ChatColor.GOLD));
+                            for (Entry<Player, Integer> score : sortedScores.entrySet()) {
+                                plugin.getServer().broadcastMessage(plugin.formatMessage("%s%s: %d points!", ChatColor.GOLD, score.getKey().getName(), score.getValue()));
                             }
+                        } else {
+                            plugin.scores = new HashMap<Player, Integer>();
                         }
-                    });
-                    plugin.scores = new HashMap<Player, Integer>();
+                    }
+
                     if (this.isAutoRun()) {
                         try {
                             plugin.getServer().getScheduler().runTask(plugin, new AsyncBroadcast(plugin, "%sWe'll be back soon!", ChatColor.GOLD));
@@ -103,8 +103,9 @@ public class QuizThread implements Runnable {
                         } catch (InterruptedException e) {
                             break;
                         }
+                    } else {
+                        t = null;
                     }
-                    t = null;
                     break;
                 case REGISTRATION:
                     plugin.getServer().getScheduler().runTask(plugin, new AsyncBroadcast(plugin, "%sA new game of quiz has started. Type /quiz join to play! We start in 1 minute.", ChatColor.GOLD));
@@ -128,22 +129,42 @@ public class QuizThread implements Runnable {
                     break;
                 case ASKQUESTION:
                     Random ran = new Random();
-                    Integer thisNumber;
-                    do {
-                        thisNumber = ran.nextInt(plugin.questions.size());
-                    } while (thisNumber.equals(lastNumber));
-                    lastNumber = thisNumber;
-                    plugin.currentQuestion = plugin.questions.get(thisNumber);
+                    synchronized (plugin.questions) {
+                        Integer thisNumber;
+                        do {
+                            thisNumber = ran.nextInt(plugin.questions.size());
+                        } while (thisNumber.equals(lastNumber));
+                        lastNumber = thisNumber;
+                        plugin.currentQuestion = plugin.questions.get(thisNumber);
+                    }
                     plugin.getServer().getScheduler().runTask(plugin, new AsyncBroadcast(plugin, "%sQuestion: " + plugin.currentQuestion.getQuestion(), ChatColor.GOLD));
                     plugin.state = QuizState.GETANSWER;
                     try {
-                        Thread.sleep(1000 * 30);
-                        plugin.getServer().getScheduler().runTask(plugin, new AsyncBroadcast(plugin, "%s30 seconds left...", ChatColor.GOLD));
-                        //TODO: Hint
-                        Thread.sleep(1000 * 20);
-                        plugin.getServer().getScheduler().runTask(plugin, new AsyncBroadcast(plugin, "%s10 seconds left...", ChatColor.GOLD));
-                        //TODO: Hint
-                        Thread.sleep(1000 * 10);
+                        Thread.sleep(1000 * 15);
+                        plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                            public void run() {
+                                plugin.getServer().broadcastMessage(plugin.formatMessage("%s45 seconds left...", ChatColor.GOLD));
+                                plugin.getServer().broadcastMessage(plugin.formatMessage("%sHint: %s", ChatColor.GOLD, QuizMaster3000.createHint(plugin.currentQuestion.getAnswer(), 90)));
+                            }
+
+                        });
+                        Thread.sleep(1000 * 15);
+                        plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                            public void run() {
+                                plugin.getServer().broadcastMessage(plugin.formatMessage("%s30 seconds left...", ChatColor.GOLD));
+                                plugin.getServer().broadcastMessage(plugin.formatMessage("%sHint: %s", ChatColor.GOLD, QuizMaster3000.createHint(plugin.currentQuestion.getAnswer(), 60)));
+                            }
+
+                        });
+                        Thread.sleep(1000 * 15);
+                        plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                            public void run() {
+                                plugin.getServer().broadcastMessage(plugin.formatMessage("%s15 seconds left...", ChatColor.GOLD));
+                                plugin.getServer().broadcastMessage(plugin.formatMessage("%sHint: %s", ChatColor.GOLD, QuizMaster3000.createHint(plugin.currentQuestion.getAnswer(), 30)));
+                            }
+
+                        });
+                        Thread.sleep(1000 * 15);
                     } catch (InterruptedException e) {
                         break;
                     }
