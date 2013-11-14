@@ -97,7 +97,7 @@ public class QuizThread implements Runnable {
                     if (this.isAutoRun()) {
                         try {
                             plugin.getServer().getScheduler().runTask(plugin, new AsyncBroadcast(plugin, "%sWe'll be back soon!", ChatColor.GOLD));
-                            Thread.sleep(plugin.config.getInt("autorun.delay") * 1000);
+                            Thread.sleep(plugin.config.getInt("quiz.autorun.delay") * 1000);
                             plugin.state = QuizState.REGISTRATION;
                             break;
                         } catch (InterruptedException e) {
@@ -144,7 +144,8 @@ public class QuizThread implements Runnable {
                         plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
                             public void run() {
                                 plugin.getServer().broadcastMessage(plugin.formatMessage("%s45 seconds left...", ChatColor.GOLD));
-                                plugin.getServer().broadcastMessage(plugin.formatMessage("%sHint: %s", ChatColor.GOLD, QuizMaster3000.createHint(plugin.currentQuestion.getAnswer(), 90)));
+                                if (plugin.config.getBoolean("quiz.hints"))
+                                    plugin.getServer().broadcastMessage(plugin.formatMessage("%sHint: %s", ChatColor.GOLD, QuizMaster3000.createHint(plugin.currentQuestion.getAnswer(), 90)));
                             }
 
                         });
@@ -152,7 +153,8 @@ public class QuizThread implements Runnable {
                         plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
                             public void run() {
                                 plugin.getServer().broadcastMessage(plugin.formatMessage("%s30 seconds left...", ChatColor.GOLD));
-                                plugin.getServer().broadcastMessage(plugin.formatMessage("%sHint: %s", ChatColor.GOLD, QuizMaster3000.createHint(plugin.currentQuestion.getAnswer(), 60)));
+                                if (plugin.config.getBoolean("quiz.hints"))
+                                    plugin.getServer().broadcastMessage(plugin.formatMessage("%sHint: %s", ChatColor.GOLD, QuizMaster3000.createHint(plugin.currentQuestion.getAnswer(), 60)));
                             }
 
                         });
@@ -160,7 +162,8 @@ public class QuizThread implements Runnable {
                         plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
                             public void run() {
                                 plugin.getServer().broadcastMessage(plugin.formatMessage("%s15 seconds left...", ChatColor.GOLD));
-                                plugin.getServer().broadcastMessage(plugin.formatMessage("%sHint: %s", ChatColor.GOLD, QuizMaster3000.createHint(plugin.currentQuestion.getAnswer(), 30)));
+                                if (plugin.config.getBoolean("quiz.hints"))
+                                    plugin.getServer().broadcastMessage(plugin.formatMessage("%sHint: %s", ChatColor.GOLD, QuizMaster3000.createHint(plugin.currentQuestion.getAnswer(), 30)));
                             }
 
                         });

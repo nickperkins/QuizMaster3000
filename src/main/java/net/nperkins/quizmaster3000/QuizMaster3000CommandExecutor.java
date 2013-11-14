@@ -59,7 +59,7 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
                         sender.sendMessage(plugin.formatMessage("The current quiz has already started."));
                         return true;
                     } else {
-                        sender.sendMessage(plugin.formatMessage("There is no quiz game running."));
+                        sender.sendMessage(plugin.formatMessage("There is no quiz thread running."));
                     }
                     return true;
                 }
@@ -79,10 +79,10 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
                 return true;
             }
             if (args[0].equalsIgnoreCase("stop")) {
-                if (plugin.state != QuizState.FINISHED) {
+                if (plugin.state != QuizState.FINISHED || plugin.thread.isRunning()) {
                     plugin.stopQuiz();
                 } else {
-                    sender.sendMessage(plugin.formatMessage("There is no quiz game running."));
+                    sender.sendMessage(plugin.formatMessage("There is no quiz thread running."));
                 }
                 return true;
             }

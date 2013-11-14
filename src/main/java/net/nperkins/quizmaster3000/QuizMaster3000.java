@@ -25,10 +25,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class QuizMaster3000 extends JavaPlugin {
 
@@ -46,9 +43,7 @@ public class QuizMaster3000 extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        this.saveDefaultConfig();
-
-        this.config = this.getConfig();
+        processConfig();
 
         String quizfilepath = this.getDataFolder() + File.separator + "questions.dat";
 
@@ -76,12 +71,38 @@ public class QuizMaster3000 extends JavaPlugin {
         }
     }
 
+    public void processConfig() {
+        final Map<String, Object> defParams = new LinkedHashMap<String, Object>();
+
+        this.config = this.getConfig();
+        config.options().copyDefaults(true);
+
+        // This is the default configuration
+        defParams.put("general.prefix", "&d[Quiz]&f");
+        defParams.put("quiz.winningScore", 5);
+        defParams.put("quiz.hints", true);
+        defParams.put("quiz.autorun.default", false);
+        defParams.put("quiz.autorun.delay", 300);
+
+        // If config does not include a default parameter, add it
+        for (final Map.Entry<String, Object> e : defParams.entrySet()) {
+            if (!config.contains(e.getKey())) {
+                config.set(e.getKey(), e.getValue());
+                getLogger().info("Added new config entry: " + e.getKey());
+            }
+        }
+        // Save default values to config.yml in data directory
+        this.saveConfig();
+    }
+
     public void startQuiz() {
         if (!thread.isRunning()) {
+            if (config.getBoolean("quiz.autorun.default")) thread.setAutoRun(true);
             state = QuizState.REGISTRATION;
             thread.start();
         }
     }
+
 
     public void startAutoQuiz() {
         if (!thread.isRunning()) {
@@ -94,8 +115,9 @@ public class QuizMaster3000 extends JavaPlugin {
 
     public void stopQuiz() {
         state = QuizState.FINISHED;
+        thread.setAutoRun(false);  // In case it is auto running
         thread.endQuiz();
-        getServer().broadcastMessage(formatMessage("%sQuiz Ended!", ChatColor.GOLD));
+        getServer().broadcastMessage(formatMessage("%sQuiz has been stopped!", ChatColor.GOLD));
 
     }
 
@@ -146,7 +168,7 @@ public class QuizMaster3000 extends JavaPlugin {
      * @return A formatted string
      */
     public String formatMessage(String message, Object... args) {
-        message = ChatColor.translateAlternateColorCodes('&', config.getString("prefix") + " " + String.format(message, args));
+        message = ChatColor.translateAlternateColorCodes('&', config.getString("general.prefix") + " " + String.format(message, args));
         return message;
     }
 
@@ -158,7 +180,7 @@ public class QuizMaster3000 extends JavaPlugin {
                     if (message.equalsIgnoreCase(a)) {
                         getServer().broadcastMessage(String.format("%sCorrect, %s!", ChatColor.GREEN, player.getName()));
                         scores.put(player, scores.get(player) + 1);
-                        if (scores.get(player) == config.getInt("winningScore")) {
+                        if (scores.get(player) == config.getInt("quiz.winningScore")) {
                             thread.endQuiz();
                         } else {
                             thread.nextQuestion();

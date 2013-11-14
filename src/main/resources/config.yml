@@ -1,4 +1,8 @@
-prefix: "&d[Quiz]&f"
-winningScore: 5
-autorun:
-  delay: 300
+general:
+  prefix: '&d[Quiz]&f' # can contain color codes
+quiz:
+  winningScore: 5 # when score reached quiz is ended
+  hints: true # show hints during question countdown
+  autorun:
+    default: false # whether to autorun quiz (/quiz autorun) when using /quiz start
+    delay: 300 # in seconds
