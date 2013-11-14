@@ -64,6 +64,15 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
                     return true;
                 }
             }
+            if (args[0].equalsIgnoreCase("help")) {
+                String[] help = {
+                        "---------------  QuizMaster3000 Help  ---------------",
+                        "/quiz join - Join the currently running quiz"//,
+                        //"/quiz scores - Show the scores for the current quiz round"
+                };
+                sender.sendMessage(help);
+                return true;
+            }
         }
         return false;
     }
@@ -92,6 +101,17 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
                 } else {
                     sender.sendMessage(plugin.formatMessage("There is already a quiz game started."));
                 }
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("help")) {
+                String[] help = {
+                        "---------------  QuizMaster3000 Admin Help  ---------------",
+                        "/quizadmin start - start a quiz",
+                        "/quizadmin autorun - start a quiz, then keep running them after a delay",
+                        "/quizadmin start - stop the currently running quiz (including during autorun delay)"
+
+                };
+                sender.sendMessage(help);
                 return true;
             }
 

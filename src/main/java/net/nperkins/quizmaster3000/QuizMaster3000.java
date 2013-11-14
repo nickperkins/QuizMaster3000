@@ -253,6 +253,8 @@ public class QuizMaster3000 extends JavaPlugin {
                         }
                     }
                 }
+            } else {
+                getServer().broadcastMessage(String.format("Sorry but you aren't part of this quiz round. Remember to tyoe /quiz join next time!"));
             }
         }
     }
@@ -306,7 +308,7 @@ public class QuizMaster3000 extends JavaPlugin {
             hint.add(new String(a));
         }
 
-        return StringUtils.join(hint, " or ");
+        return StringUtils.join(hint, ", or ");
     }
 
 }
