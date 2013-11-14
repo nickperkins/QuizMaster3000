@@ -32,13 +32,62 @@ public class QuizMaster3000 extends JavaPlugin {
     private final QuizMaster3000CommandExecutor commandExecutor = new QuizMaster3000CommandExecutor(this);
     private final QuizMaster3000Listener listener = new QuizMaster3000Listener(this);
 
-    public QuizThread thread = new QuizThread(this);
-    volatile public QuizState state = QuizState.FINISHED;
-    volatile HashMap<Player, Integer> scores = new HashMap<Player, Integer>();
-    volatile public Question currentQuestion = null;
+    private final RegistrationRunnable registrationRunnable = new RegistrationRunnable(this);
+    private final AskQuestionRunnable questionRunnable = new AskQuestionRunnable(this);
+    private final WaitForNextRunnable waitForNextRunnable = new WaitForNextRunnable(this);
+    private final AutoRunRunnable autoRunRunnable = new AutoRunRunnable(this);
 
+
+    private FileConfiguration config = null;
+
+    public QuizState state = QuizState.FINISHED;
+    public HashMap<Player, Integer> scores = new HashMap<Player, Integer>();
     public ArrayList<Question> questions = new ArrayList<Question>();
-    public FileConfiguration config = null;
+
+    private Question currentQuestion = null;
+    private Integer lastQuestion = null;
+    private Boolean autoRun = false;
+    private Boolean isRunning = false;
+
+    public RegistrationRunnable getRegistrationRunnable() {
+        return registrationRunnable;
+    }
+
+    public AskQuestionRunnable getQuestionRunnable() {
+        return questionRunnable;
+    }
+
+    public WaitForNextRunnable getWaitForNextRunnable() {
+        return waitForNextRunnable;
+    }
+
+    public AutoRunRunnable getAutoRunRunnable() {
+        return autoRunRunnable;
+    }
+
+    public Boolean getRunning() {
+        return isRunning;
+    }
+
+    public void setRunning(Boolean running) {
+        isRunning = running;
+    }
+
+    public Question getCurrentQuestion() {
+        return currentQuestion;
+    }
+
+    public void setCurrentQuestion(Question currentQuestion) {
+        this.currentQuestion = currentQuestion;
+    }
+
+    public Boolean getAutoRun() {
+        return autoRun;
+    }
+
+    public void setAutoRun(Boolean autoRun) {
+        this.autoRun = autoRun;
+    }
 
     @Override
     public void onEnable() {
@@ -66,7 +115,7 @@ public class QuizMaster3000 extends JavaPlugin {
     public void onDisable() {
 
         // If quiz thread is running, better stop it
-        if (thread.isRunning()) {
+        if (getRunning()) {
             stopQuiz();
         }
     }
@@ -96,28 +145,31 @@ public class QuizMaster3000 extends JavaPlugin {
     }
 
     public void startQuiz() {
-        if (!thread.isRunning()) {
-            if (config.getBoolean("quiz.autorun.default")) thread.setAutoRun(true);
+        if (!getRunning()) {
+            if (config.getBoolean("quiz.autorun.default")) setAutoRun(true);
             state = QuizState.REGISTRATION;
-            thread.start();
+            setRunning(true);
+            getRegistrationRunnable().start();
         }
     }
 
 
     public void startAutoQuiz() {
-        if (!thread.isRunning()) {
-            thread.setAutoRun(true);
+        if (!getRunning()) {
+            setAutoRun(true);
             state = QuizState.REGISTRATION;
-            thread.start();
+            setRunning(true);
+            getRegistrationRunnable().start();
         }
-
     }
 
     public void stopQuiz() {
         state = QuizState.FINISHED;
-        thread.setAutoRun(false);  // In case it is auto running
-        thread.endQuiz();
-        getServer().broadcastMessage(formatMessage("%sQuiz has been stopped!", ChatColor.GOLD));
+        setAutoRun(false);  // In case it is auto running
+        getServer().getScheduler().cancelTasks(this);
+        scores = new HashMap<Player, Integer>();
+        getServer().broadcastMessage(formatMessage("Quiz has been stopped!"));
+        setRunning(false);
 
     }
 
@@ -125,7 +177,7 @@ public class QuizMaster3000 extends JavaPlugin {
 
         File quizFile = new File(filePath);
         if (!quizFile.exists()) {
-            Bukkit.getLogger().info(formatMessage("%sQuiz data file does not exist - providing default questions.", ChatColor.GOLD));
+            Bukkit.getLogger().info(formatMessage("Quiz data file does not exist - providing default questions."));
 
             if (!quizFile.exists()) {
                 try {
@@ -172,18 +224,32 @@ public class QuizMaster3000 extends JavaPlugin {
         return message;
     }
 
+    public void askQuestion() {
+        Random ran = new Random();
+        Integer thisNumber;
+        do {
+            thisNumber = ran.nextInt(questions.size());
+        } while (thisNumber.equals(lastQuestion));
+        lastQuestion = thisNumber;
+        currentQuestion = questions.get(thisNumber);
+
+        getServer().broadcastMessage(formatMessage("Question: " + currentQuestion.getQuestion()));
+        state = QuizState.GETANSWER;
+    }
+
     public void checkAnswer(Player player, String message) {
 
         if (state == QuizState.GETANSWER) {
             if (scores.containsKey(player)) {
                 for (String a : currentQuestion.getAnswer()) {
                     if (message.equalsIgnoreCase(a)) {
+                        getServer().getScheduler().cancelTask(getQuestionRunnable().getID());
                         getServer().broadcastMessage(String.format("%sCorrect, %s!", ChatColor.GREEN, player.getName()));
                         scores.put(player, scores.get(player) + 1);
                         if (scores.get(player) == config.getInt("quiz.winningScore")) {
-                            thread.endQuiz();
+                            finishQuiz();
                         } else {
-                            thread.nextQuestion();
+                            getWaitForNextRunnable().start();
                         }
                     }
                 }
@@ -191,18 +257,36 @@ public class QuizMaster3000 extends JavaPlugin {
         }
     }
 
+    public void finishQuiz() {
+        if (scores.size() != 0) {
+            Map<Player, Integer> sortedScores = Util.sortScores(scores);
+            getServer().broadcastMessage(formatMessage("Scores!"));
+            for (Map.Entry<Player, Integer> score : sortedScores.entrySet()) {
+                getServer().broadcastMessage(formatMessage("%s: %d points!", score.getKey().getName(), score.getValue()));
+            }
+            scores = new HashMap<Player, Integer>();
+        }
+        if (getAutoRun()) {
+            getServer().broadcastMessage(formatMessage("We'll be back soon!"));
+            getAutoRunRunnable().start();
+        }
+    }
 
-    public static String createHint(String[] answer, Integer percent) {
+    public String getHint(Integer p) throws IllegalArgumentException {
+
+        if (p > 100) {
+            throw new IllegalArgumentException();
+        }
 
         List<String> hint = new ArrayList<String>();
 
 
-        for (String s : answer) {
+        for (String s : this.getCurrentQuestion().getAnswer()) {
 
             char[] a = s.toCharArray();
             if (a.length > 4) {
                 Random r = new Random();
-                Integer charToReplace = Math.round((float) a.length * (percent / 100f));
+                Integer charToReplace = Math.round((float) a.length * (p / 100f));
                 List<Integer> replacedIndexes = new ArrayList<Integer>();
                 while (replacedIndexes.size() < charToReplace) {
                     Integer index;
@@ -215,7 +299,7 @@ public class QuizMaster3000 extends JavaPlugin {
 
             } else {
                 for (int i = 0; i < a.length; i++) {
-                    if (a[i] == ' ') a[i] = '*';
+                    if (a[i] != ' ') a[i] = '*';
                 }
 
             }
@@ -224,4 +308,5 @@ public class QuizMaster3000 extends JavaPlugin {
 
         return StringUtils.join(hint, " or ");
     }
+
 }

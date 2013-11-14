@@ -79,7 +79,7 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
                 return true;
             }
             if (args[0].equalsIgnoreCase("stop")) {
-                if (plugin.state != QuizState.FINISHED || plugin.thread.isRunning()) {
+                if (plugin.state != QuizState.FINISHED || plugin.getRunning()) {
                     plugin.stopQuiz();
                 } else {
                     sender.sendMessage(plugin.formatMessage("There is no quiz thread running."));
