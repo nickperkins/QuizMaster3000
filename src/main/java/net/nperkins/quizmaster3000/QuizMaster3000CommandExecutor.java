@@ -64,11 +64,15 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
                     return true;
                 }
             }
+            if (args[0].equalsIgnoreCase("scores")) {
+                plugin.displayScores((Player) sender);
+                return true;
+            }
             if (args[0].equalsIgnoreCase("help")) {
                 String[] help = {
                         "---------------  QuizMaster3000 Help  ---------------",
-                        "/quiz join - Join the currently running quiz"//,
-                        //"/quiz scores - Show the scores for the current quiz round"
+                        "/quiz join - Join the currently running quiz",
+                        "/quiz scores - Show the scores for the current quiz round"
                 };
                 sender.sendMessage(help);
                 return true;

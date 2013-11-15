@@ -23,7 +23,7 @@ import org.bukkit.Bukkit;
 public class RegistrationRunnable implements Runnable {
 
 
-    private int timer = 45;
+    private int timer;
     private int id = -1;
     private QuizMaster3000 plugin;
 
@@ -35,6 +35,7 @@ public class RegistrationRunnable implements Runnable {
     public void start() {
         plugin.getServer().broadcastMessage(plugin.formatMessage("A new game of quiz has started. Type /quiz join to play! We start in 1 minute."));
         id = Bukkit.getScheduler().runTaskTimer(plugin, this, 15 * 20, 15 * 20).getTaskId();
+        timer = 45;
     }
 
     @Override
@@ -45,6 +46,10 @@ public class RegistrationRunnable implements Runnable {
                 plugin.state = QuizState.FINISHED;
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.setRunning(false);
+                if (plugin.getAutoRun()) {
+                    plugin.getServer().broadcastMessage(plugin.formatMessage("We'll be back soon!"));
+                    plugin.getAutoRunRunnable().start();
+                }
             } else {
                 plugin.getServer().broadcastMessage(plugin.formatMessage("Just type your answers into chat. Ready? Let's play!"));
                 plugin.state = QuizState.WAITFORNEXT;

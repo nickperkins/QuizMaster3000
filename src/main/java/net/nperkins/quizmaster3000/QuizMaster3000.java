@@ -262,15 +262,28 @@ public class QuizMaster3000 extends JavaPlugin {
     public void finishQuiz() {
         if (scores.size() != 0) {
             Map<Player, Integer> sortedScores = Util.sortScores(scores);
-            getServer().broadcastMessage(formatMessage("Scores!"));
+            getServer().broadcastMessage(formatMessage("---------- Final Scores ----------"));
             for (Map.Entry<Player, Integer> score : sortedScores.entrySet()) {
                 getServer().broadcastMessage(formatMessage("%s: %d points!", score.getKey().getName(), score.getValue()));
             }
             scores = new HashMap<Player, Integer>();
+            setRunning(false);
         }
         if (getAutoRun()) {
             getServer().broadcastMessage(formatMessage("We'll be back soon!"));
             getAutoRunRunnable().start();
+        }
+    }
+
+    public void displayScores(Player p) {
+        if (scores.size() != 0) {
+            Map<Player, Integer> sortedScores = Util.sortScores(scores);
+            p.sendMessage(formatMessage("---------- Scores ----------"));
+            for (Map.Entry<Player, Integer> score : sortedScores.entrySet()) {
+                p.sendMessage(formatMessage("%s: %d points", score.getKey().getName(), score.getValue()));
+            }
+        } else {
+            p.sendMessage(formatMessage("No scores to display"));
         }
     }
 
@@ -286,24 +299,16 @@ public class QuizMaster3000 extends JavaPlugin {
         for (String s : this.getCurrentQuestion().getAnswer()) {
 
             char[] a = s.toCharArray();
-            if (a.length > 4) {
-                Random r = new Random();
-                Integer charToReplace = Math.round((float) a.length * (p / 100f));
-                List<Integer> replacedIndexes = new ArrayList<Integer>();
-                while (replacedIndexes.size() < charToReplace) {
-                    Integer index;
-                    do {
-                        index = r.nextInt(a.length);
-                    } while ((a[index] == ' ') || replacedIndexes.contains(index));
-                    a[index] = '*';
-                    replacedIndexes.add(index);
-                }
-
-            } else {
-                for (int i = 0; i < a.length; i++) {
-                    if (a[i] != ' ') a[i] = '*';
-                }
-
+            Random r = new Random();
+            Integer charToReplace = Math.round((float) a.length * (p / 100f));
+            List<Integer> replacedIndexes = new ArrayList<Integer>();
+            while (replacedIndexes.size() < charToReplace) {
+                Integer index;
+                do {
+                    index = r.nextInt(a.length);
+                } while (replacedIndexes.contains(index));
+                if (a[index] != ' ') a[index] = '*';
+                replacedIndexes.add(index);
             }
             hint.add(new String(a));
         }
@@ -311,4 +316,6 @@ public class QuizMaster3000 extends JavaPlugin {
         return StringUtils.join(hint, ", or ");
     }
 
+
 }
+
