@@ -21,9 +21,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class QuizMaster3000CommandExecutor implements CommandExecutor {
+class QuizMaster3000CommandExecutor implements CommandExecutor {
 
-    private QuizMaster3000 plugin;
+    private final QuizMaster3000 plugin;
 
     public QuizMaster3000CommandExecutor(QuizMaster3000 plugin) {
         this.plugin = plugin;
@@ -31,49 +31,45 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("quiz")) {
+        if (cmd.getName().equalsIgnoreCase("quiz")) { //NON-NLS
             return commandQuiz(sender, args);
         }
-        if (cmd.getName().equalsIgnoreCase("quizadmin")) {
+        if (cmd.getName().equalsIgnoreCase("quizadmin")) { //NON-NLS
             return commandQuizAdmin(sender, args);
         }
         return false;
     }
 
-    public boolean commandQuiz(CommandSender sender, String[] args) {
+    boolean commandQuiz(CommandSender sender, String[] args) {
         if (args.length > 0) {
-            if (args[0].equalsIgnoreCase("join")) {
+            if (args[0].equalsIgnoreCase("join")) { //NON-NLS
                 if (!(sender instanceof Player)) {
-                    sender.sendMessage(plugin.formatMessage("This is for players only!"));
+                    sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.notplayer")));
                 } else {
-                    if (plugin.state == QuizState.REGISTRATION) {
-                        if (plugin.scores.containsKey((Player) sender)) {
-                            sender.sendMessage(plugin.formatMessage("You have already joined this quiz round!"));
+                    if (plugin.getState() == QuizState.REGISTRATION) {
+                        if (plugin.getScores().containsKey((Player) sender)) {
+                            sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.alreadyjoined")));
                             return true;
                         } else {
-                            plugin.scores.put((Player) sender, 0);
-                            sender.sendMessage(plugin.formatMessage("You have been added to the quiz!"));
+                            plugin.getScores().put((Player) sender, 0);
+                            sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.registration.playerjoined")));
                             return true;
                         }
-                    } else if (plugin.state != QuizState.FINISHED) {
-                        sender.sendMessage(plugin.formatMessage("The current quiz has already started."));
+                    } else if (plugin.getState() != QuizState.FINISHED) {
+                        sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.alreadystarted")));
                         return true;
                     } else {
-                        sender.sendMessage(plugin.formatMessage("There is no quiz thread running."));
+                        sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.noquizrunning")));
                     }
                     return true;
                 }
             }
-            if (args[0].equalsIgnoreCase("scores")) {
+            if (args[0].equalsIgnoreCase("scores")) { //NON-NLS
                 plugin.displayScores((Player) sender);
                 return true;
             }
-            if (args[0].equalsIgnoreCase("help")) {
-                String[] help = {
-                        "---------------  QuizMaster3000 Help  ---------------",
-                        "/quiz join - Join the currently running quiz",
-                        "/quiz scores - Show the scores for the current quiz round"
-                };
+            if (args[0].equalsIgnoreCase("help")) { //NON-NLS
+                String[] help = plugin.getMessages().getString("quiz.help").split(",");
                 sender.sendMessage(help);
                 return true;
             }
@@ -81,40 +77,34 @@ public class QuizMaster3000CommandExecutor implements CommandExecutor {
         return false;
     }
 
-    public boolean commandQuizAdmin(CommandSender sender, String[] args) {
+    boolean commandQuizAdmin(CommandSender sender, String[] args) {
         if (args.length > 0) {
-            if (args[0].equalsIgnoreCase("start")) {
-                if (plugin.state == QuizState.FINISHED) {
+            if (args[0].equalsIgnoreCase("start")) { //NON-NLS
+                if (plugin.getState() == QuizState.FINISHED) {
                     plugin.startQuiz();
                 } else {
-                    sender.sendMessage(plugin.formatMessage("There is already a quiz game started."));
+                    sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.alreadystarted")));
                 }
                 return true;
             }
-            if (args[0].equalsIgnoreCase("stop")) {
-                if (plugin.state != QuizState.FINISHED || plugin.getRunning()) {
+            if (args[0].equalsIgnoreCase("stop")) { //NON-NLS
+                if (plugin.getState() != QuizState.FINISHED || plugin.getRunning()) {
                     plugin.stopQuiz();
                 } else {
-                    sender.sendMessage(plugin.formatMessage("There is no quiz thread running."));
+                    sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.noquizrunning")));
                 }
                 return true;
             }
-            if (args[0].equalsIgnoreCase("autorun")) {
-                if (plugin.state == QuizState.FINISHED) {
+            if (args[0].equalsIgnoreCase("autorun")) { //NON-NLS
+                if (plugin.getState() == QuizState.FINISHED) {
                     plugin.startAutoQuiz();
                 } else {
-                    sender.sendMessage(plugin.formatMessage("There is already a quiz game started."));
+                    sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.alreadystarted")));
                 }
                 return true;
             }
-            if (args[0].equalsIgnoreCase("help")) {
-                String[] help = {
-                        "---------------  QuizMaster3000 Admin Help  ---------------",
-                        "/quizadmin start - start a quiz",
-                        "/quizadmin autorun - start a quiz, then keep running them after a delay",
-                        "/quizadmin start - stop the currently running quiz (including during autorun delay)"
-
-                };
+            if (args[0].equalsIgnoreCase("help")) { //NON-NLS
+                String help = plugin.getMessages().getString("quizadmin.help");
                 sender.sendMessage(help);
                 return true;
             }

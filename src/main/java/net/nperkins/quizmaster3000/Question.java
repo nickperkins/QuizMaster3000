@@ -17,7 +17,7 @@ package net.nperkins.quizmaster3000;
  */
 
 
-public class Question {
+class Question {
 
     private String question;
     private String[] answer;

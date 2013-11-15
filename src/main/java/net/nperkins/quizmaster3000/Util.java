@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 
-public class Util {
+class Util {
 
     public static Map<Player, Integer> sortScores(HashMap<Player, Integer> map) {
         List<Map.Entry<Player, Integer>> entries = new LinkedList<Map.Entry<Player, Integer>>(map.entrySet());

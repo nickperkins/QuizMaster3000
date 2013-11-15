@@ -21,13 +21,14 @@ package net.nperkins.quizmaster3000;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 
-public class AskQuestionRunnable implements Runnable {
+class AskQuestionRunnable implements Runnable {
 
     private int timer;
     private int id = -1;
-    private QuizMaster3000 plugin;
+    private final QuizMaster3000 plugin;
 
     public AskQuestionRunnable(QuizMaster3000 p) {
         plugin = p;
@@ -44,21 +45,21 @@ public class AskQuestionRunnable implements Runnable {
     public void run() {
         if (timer <= 0) {
             Bukkit.getScheduler().cancelTask(id);
-            plugin.getServer().broadcastMessage(plugin.formatMessage("Time's up!"));
-            plugin.getServer().broadcastMessage(plugin.formatMessage("The correct answer was: %s", StringUtils.join(Arrays.copyOfRange(plugin.getCurrentQuestion().getAnswer(), 0, plugin.getCurrentQuestion().getAnswer().length), " or ")));
-            if (plugin.scores.size() == 0) {
-                plugin.getServer().broadcastMessage(plugin.formatMessage("Seems all the players from this round have left. No point going on, is there?"));
+            plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.question.timeup")));
+            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.answer"), StringUtils.join(Arrays.copyOfRange(plugin.getCurrentQuestion().getAnswer(), 0, plugin.getCurrentQuestion().getAnswer().length), plugin.getMessages().getString("quiz.answer.joiner")))));
+            if (plugin.getScores().size() == 0) {
+                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("error.allplayersleft")));
                 Bukkit.getScheduler().cancelTask(id);
-                plugin.state = QuizState.FINISHED;
+                plugin.setState(QuizState.FINISHED);
             } else {
-                plugin.getServer().broadcastMessage(plugin.formatMessage("OK, Next Question..."));
-                plugin.state = QuizState.WAITFORNEXT;
+                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.question.next")));
+                plugin.setState(QuizState.WAITFORNEXT);
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.getWaitForNextRunnable().start();
             }
         } else {
-            plugin.getServer().broadcastMessage(plugin.formatMessage("You have %d seconds left", timer));
-            plugin.getServer().broadcastMessage(plugin.formatMessage("Hint: %s", plugin.getHint(timer * 2)));
+            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.timeleft"), timer)));
+            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.hint"), plugin.getHint(timer * 2))));
             timer -= 15;
         }
     }

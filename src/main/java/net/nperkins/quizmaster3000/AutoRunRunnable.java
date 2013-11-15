@@ -20,16 +20,16 @@ package net.nperkins.quizmaster3000;
 
 import org.bukkit.Bukkit;
 
-public class AutoRunRunnable implements Runnable {
+class AutoRunRunnable implements Runnable {
 
-    private QuizMaster3000 plugin;
+    private final QuizMaster3000 plugin;
 
     public AutoRunRunnable(QuizMaster3000 p) {
         plugin = p;
     }
 
     public void start() {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this, plugin.getConfig().getInt("quiz.autorun.delay") * 20);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this, plugin.getConfig().getInt("quiz.autorun.delay") * 20); //NON-NLS
     }
 
     @Override

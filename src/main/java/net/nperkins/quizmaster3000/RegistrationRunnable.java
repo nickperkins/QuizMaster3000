@@ -20,12 +20,14 @@ package net.nperkins.quizmaster3000;
 
 import org.bukkit.Bukkit;
 
-public class RegistrationRunnable implements Runnable {
+import java.text.MessageFormat;
+
+class RegistrationRunnable implements Runnable {
 
 
     private int timer;
     private int id = -1;
-    private QuizMaster3000 plugin;
+    private final QuizMaster3000 plugin;
 
     public RegistrationRunnable(QuizMaster3000 p) {
         plugin = p;
@@ -33,7 +35,7 @@ public class RegistrationRunnable implements Runnable {
 
 
     public void start() {
-        plugin.getServer().broadcastMessage(plugin.formatMessage("A new game of quiz has started. Type /quiz join to play! We start in 1 minute."));
+        plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.registration.start")));
         id = Bukkit.getScheduler().runTaskTimer(plugin, this, 15 * 20, 15 * 20).getTaskId();
         timer = 45;
     }
@@ -41,23 +43,23 @@ public class RegistrationRunnable implements Runnable {
     @Override
     public void run() {
         if (timer <= 0) {
-            if (plugin.scores.size() == 0) {
-                plugin.getServer().broadcastMessage(plugin.formatMessage("No players joined the game. Maybe next time?"));
-                plugin.state = QuizState.FINISHED;
+            if (plugin.getScores().size() == 0) {
+                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.registration.noplayersjoined")));
+                plugin.setState(QuizState.FINISHED);
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.setRunning(false);
                 if (plugin.getAutoRun()) {
-                    plugin.getServer().broadcastMessage(plugin.formatMessage("We'll be back soon!"));
+                    plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.autorun.nextgame")));
                     plugin.getAutoRunRunnable().start();
                 }
             } else {
-                plugin.getServer().broadcastMessage(plugin.formatMessage("Just type your answers into chat. Ready? Let's play!"));
-                plugin.state = QuizState.WAITFORNEXT;
+                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.registration.finished")));
+                plugin.setState(QuizState.WAITFORNEXT);
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.getWaitForNextRunnable().start();
             }
         } else {
-            plugin.getServer().broadcastMessage(plugin.formatMessage("%d seconds until we start. Type /quiz join to play", timer));
+            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.registration.timer"), timer)));
             timer -= 15;
         }
     }

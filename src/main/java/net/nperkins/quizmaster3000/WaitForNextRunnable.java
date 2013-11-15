@@ -20,9 +20,9 @@ package net.nperkins.quizmaster3000;
 
 import org.bukkit.Bukkit;
 
-public class WaitForNextRunnable implements Runnable {
+class WaitForNextRunnable implements Runnable {
 
-    private QuizMaster3000 plugin;
+    private final QuizMaster3000 plugin;
 
     public WaitForNextRunnable(QuizMaster3000 p) {
         plugin = p;
@@ -34,7 +34,7 @@ public class WaitForNextRunnable implements Runnable {
 
     @Override
     public void run() {
-        plugin.state = QuizState.ASKQUESTION;
+        plugin.setState(QuizState.ASKQUESTION);
         plugin.getQuestionRunnable().start();
     }
 

@@ -25,32 +25,67 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
+import java.text.MessageFormat;
 import java.util.*;
 
 public class QuizMaster3000 extends JavaPlugin {
 
+    // Localisation
+    private ResourceBundle messages;
+    private static Locale locale;
+
+    // Configuration
+    private FileConfiguration config = null;
+
+    // Listeners
     private final QuizMaster3000CommandExecutor commandExecutor = new QuizMaster3000CommandExecutor(this);
     private final QuizMaster3000Listener listener = new QuizMaster3000Listener(this);
 
+    // Runnables
     private final RegistrationRunnable registrationRunnable = new RegistrationRunnable(this);
     private final AskQuestionRunnable questionRunnable = new AskQuestionRunnable(this);
     private final WaitForNextRunnable waitForNextRunnable = new WaitForNextRunnable(this);
     private final AutoRunRunnable autoRunRunnable = new AutoRunRunnable(this);
 
 
-    private FileConfiguration config = null;
-
-    public QuizState state = QuizState.FINISHED;
-    public HashMap<Player, Integer> scores = new HashMap<Player, Integer>();
-    public ArrayList<Question> questions = new ArrayList<Question>();
-
-    private Question currentQuestion = null;
-    private Integer lastQuestion = null;
+    // Quiz status info
+    private QuizState state = QuizState.FINISHED;
     private Boolean autoRun = false;
     private Boolean isRunning = false;
 
-    public RegistrationRunnable getRegistrationRunnable() {
-        return registrationRunnable;
+    // Quiz game information
+    private HashMap<Player, Integer> scores = new HashMap<Player, Integer>();
+    private final ArrayList<Question> questions = new ArrayList<Question>();
+    private Question currentQuestion = null;
+    private Integer lastQuestion = null;
+
+    public QuizMaster3000() {
+        setLocale(Locale.getDefault());
+    }
+
+    public static Locale getLocale() {
+        return locale;
+    }
+
+    void setLocale(Locale l) {
+        locale = l;
+        messages = ResourceBundle.getBundle("Messages", l); //NON-NLS
+    }
+
+    public ResourceBundle getMessages() {
+        return messages;
+    }
+
+    public QuizState getState() {
+        return state;
+    }
+
+    public void setState(QuizState state) {
+        this.state = state;
+    }
+
+    public HashMap<Player, Integer> getScores() {
+        return scores;
     }
 
     public AskQuestionRunnable getQuestionRunnable() {
@@ -77,16 +112,8 @@ public class QuizMaster3000 extends JavaPlugin {
         return currentQuestion;
     }
 
-    public void setCurrentQuestion(Question currentQuestion) {
-        this.currentQuestion = currentQuestion;
-    }
-
     public Boolean getAutoRun() {
         return autoRun;
-    }
-
-    public void setAutoRun(Boolean autoRun) {
-        this.autoRun = autoRun;
     }
 
     @Override
@@ -94,7 +121,7 @@ public class QuizMaster3000 extends JavaPlugin {
 
         processConfig();
 
-        String quizfilepath = this.getDataFolder() + File.separator + "questions.dat";
+        String quizfilepath = this.getDataFolder() + File.separator + "questions.dat"; //NON-NLS
 
         this.checkQuestions(quizfilepath);
         try {
@@ -104,8 +131,8 @@ public class QuizMaster3000 extends JavaPlugin {
         }
 
         // Register CommandExecutor
-        getCommand("quiz").setExecutor(commandExecutor);
-        getCommand("quizadmin").setExecutor(commandExecutor);
+        getCommand("quiz").setExecutor(commandExecutor); //NON-NLS
+        getCommand("quizadmin").setExecutor(commandExecutor); //NON-NLS
 
         // Register Listener
         getServer().getPluginManager().registerEvents(listener, this);
@@ -115,29 +142,29 @@ public class QuizMaster3000 extends JavaPlugin {
     public void onDisable() {
 
         // If quiz thread is running, better stop it
-        if (getRunning()) {
+        if (isRunning) {
             stopQuiz();
         }
     }
 
-    public void processConfig() {
+    void processConfig() {
         final Map<String, Object> defParams = new LinkedHashMap<String, Object>();
 
         this.config = this.getConfig();
         config.options().copyDefaults(true);
 
         // This is the default configuration
-        defParams.put("general.prefix", "&d[Quiz]&f");
-        defParams.put("quiz.winningScore", 5);
-        defParams.put("quiz.hints", true);
-        defParams.put("quiz.autorun.default", false);
-        defParams.put("quiz.autorun.delay", 300);
+        defParams.put("general.prefix", "&d[Quiz]&f"); //NON-NLS NON-NLS
+        defParams.put("quiz.winningScore", 5); //NON-NLS
+        defParams.put("quiz.hints", true); //NON-NLS
+        defParams.put("quiz.autorun.default", false); //NON-NLS
+        defParams.put("quiz.autorun.delay", 300); //NON-NLS
 
         // If config does not include a default parameter, add it
         for (final Map.Entry<String, Object> e : defParams.entrySet()) {
             if (!config.contains(e.getKey())) {
                 config.set(e.getKey(), e.getValue());
-                getLogger().info("Added new config entry: " + e.getKey());
+                getLogger().info(MessageFormat.format(messages.getString("plugin.configadd"), e.getKey()));
             }
         }
         // Save default values to config.yml in data directory
@@ -145,31 +172,31 @@ public class QuizMaster3000 extends JavaPlugin {
     }
 
     public void startQuiz() {
-        if (!getRunning()) {
-            if (config.getBoolean("quiz.autorun.default")) setAutoRun(true);
+        if (!isRunning) {
+            if (config.getBoolean("quiz.autorun.default")) autoRun = true; //NON-NLS
             state = QuizState.REGISTRATION;
-            setRunning(true);
-            getRegistrationRunnable().start();
+            isRunning = true;
+            registrationRunnable.start();
         }
     }
 
 
     public void startAutoQuiz() {
-        if (!getRunning()) {
-            setAutoRun(true);
+        if (!isRunning) {
+            autoRun = true;
             state = QuizState.REGISTRATION;
-            setRunning(true);
-            getRegistrationRunnable().start();
+            isRunning = true;
+            registrationRunnable.start();
         }
     }
 
     public void stopQuiz() {
         state = QuizState.FINISHED;
-        setAutoRun(false);  // In case it is auto running
+        autoRun = false;  // In case it is auto running
         getServer().getScheduler().cancelTasks(this);
         scores = new HashMap<Player, Integer>();
-        getServer().broadcastMessage(formatMessage("Quiz has been stopped!"));
-        setRunning(false);
+        getServer().broadcastMessage(messages.getString("quiz.stopped"));
+        isRunning = false;
 
     }
 
@@ -177,12 +204,12 @@ public class QuizMaster3000 extends JavaPlugin {
 
         File quizFile = new File(filePath);
         if (!quizFile.exists()) {
-            Bukkit.getLogger().info(formatMessage("Quiz data file does not exist - providing default questions."));
+            Bukkit.getLogger().info(prefixMessage(messages.getString("error.noquizdata")));
 
             if (!quizFile.exists()) {
                 try {
                     quizFile.createNewFile();
-                    InputStream in = (getClass().getResourceAsStream("/questions.dat"));
+                    InputStream in = (getClass().getResourceAsStream("/questions.dat")); //NON-NLS
                     FileOutputStream out = new FileOutputStream(quizFile);
                     byte[] buffer = new byte[1024];
                     int len;
@@ -201,9 +228,9 @@ public class QuizMaster3000 extends JavaPlugin {
 
         BufferedReader br = new BufferedReader(new FileReader(quizfilepath));
         String line;
+        Question thisLine = new Question();
         while ((line = br.readLine()) != null) {
             String[] splitLine = line.split("\\|");
-            Question thisLine = new Question();
             thisLine.setQuestion(splitLine[0]);
             thisLine.setAnswer((String[]) ArrayUtils.subarray(splitLine, 1, splitLine.length));
             questions.add(thisLine);
@@ -211,16 +238,8 @@ public class QuizMaster3000 extends JavaPlugin {
         br.close();
     }
 
-
-    /**
-     * Returns a formatted string using the specified string format prefixed with the configured prefix.
-     *
-     * @param message A format string
-     * @param args    Arguments referenced by the format specifiers in the format string. If there are more arguments than format specifiers, the extra arguments are ignored. The number of arguments is variable and may be zero.
-     * @return A formatted string
-     */
-    public String formatMessage(String message, Object... args) {
-        message = ChatColor.translateAlternateColorCodes('&', config.getString("general.prefix") + " " + String.format(message, args));
+    public String prefixMessage(String message) {
+        message = ChatColor.translateAlternateColorCodes('&', config.getString("general.prefix") + ' ' + message); //NON-NLS
         return message;
     }
 
@@ -233,7 +252,7 @@ public class QuizMaster3000 extends JavaPlugin {
         lastQuestion = thisNumber;
         currentQuestion = questions.get(thisNumber);
 
-        getServer().broadcastMessage(formatMessage("Question: " + currentQuestion.getQuestion()));
+        getServer().broadcastMessage(prefixMessage(MessageFormat.format(messages.getString("quiz.question.question"), currentQuestion.getQuestion())));
         state = QuizState.GETANSWER;
     }
 
@@ -243,47 +262,47 @@ public class QuizMaster3000 extends JavaPlugin {
             if (scores.containsKey(player)) {
                 for (String a : currentQuestion.getAnswer()) {
                     if (message.equalsIgnoreCase(a)) {
-                        getServer().getScheduler().cancelTask(getQuestionRunnable().getID());
-                        getServer().broadcastMessage(String.format("%sCorrect, %s!", ChatColor.GREEN, player.getName()));
+                        getServer().getScheduler().cancelTask(questionRunnable.getID());
+                        getServer().broadcastMessage(MessageFormat.format(messages.getString("quiz.question.playercorrect"), ChatColor.GREEN, player.getName()));
                         scores.put(player, scores.get(player) + 1);
-                        if (scores.get(player) == config.getInt("quiz.winningScore")) {
+                        if (scores.get(player) == config.getInt("quiz.winningScore")) { //NON-NLS
                             finishQuiz();
                         } else {
-                            getWaitForNextRunnable().start();
+                            waitForNextRunnable.start();
                         }
                     }
                 }
             } else {
-                getServer().broadcastMessage(String.format("Sorry but you aren't part of this quiz round. Remember to tyoe /quiz join next time!"));
+                getServer().broadcastMessage(messages.getString("error.notplaying"));
             }
         }
     }
 
-    public void finishQuiz() {
+    void finishQuiz() {
         if (scores.size() != 0) {
             Map<Player, Integer> sortedScores = Util.sortScores(scores);
-            getServer().broadcastMessage(formatMessage("---------- Final Scores ----------"));
+            getServer().broadcastMessage(prefixMessage(prefixMessage("---------- " + messages.getString("quiz.scores.final") + " ----------")));
             for (Map.Entry<Player, Integer> score : sortedScores.entrySet()) {
-                getServer().broadcastMessage(formatMessage("%s: %d points!", score.getKey().getName(), score.getValue()));
+                getServer().broadcastMessage(prefixMessage(MessageFormat.format(messages.getString("quiz.scores.points"), score.getKey().getName(), score.getValue())));
             }
             scores = new HashMap<Player, Integer>();
-            setRunning(false);
+            isRunning = false;
         }
-        if (getAutoRun()) {
-            getServer().broadcastMessage(formatMessage("We'll be back soon!"));
-            getAutoRunRunnable().start();
+        if (autoRun) {
+            getServer().broadcastMessage(prefixMessage(messages.getString("quiz.autorun.nextgame")));
+            autoRunRunnable.start();
         }
     }
 
     public void displayScores(Player p) {
         if (scores.size() != 0) {
             Map<Player, Integer> sortedScores = Util.sortScores(scores);
-            p.sendMessage(formatMessage("---------- Scores ----------"));
+            p.sendMessage(prefixMessage("---------- " + messages.getString("quiz.scores.interim") + " ----------"));
             for (Map.Entry<Player, Integer> score : sortedScores.entrySet()) {
-                p.sendMessage(formatMessage("%s: %d points", score.getKey().getName(), score.getValue()));
+                p.sendMessage(prefixMessage(prefixMessage(MessageFormat.format(messages.getString("quiz.scores.points"), score.getKey().getName(), score.getValue()))));
             }
         } else {
-            p.sendMessage(formatMessage("No scores to display"));
+            p.sendMessage(prefixMessage(messages.getString("error.noscores")));
         }
     }
 
@@ -295,13 +314,14 @@ public class QuizMaster3000 extends JavaPlugin {
 
         List<String> hint = new ArrayList<String>();
 
-
-        for (String s : this.getCurrentQuestion().getAnswer()) {
+        Random r = new Random();
+        List<Integer> replacedIndexes = new ArrayList<Integer>();
+        for (String s : this.currentQuestion.getAnswer()) {
 
             char[] a = s.toCharArray();
-            Random r = new Random();
+
             Integer charToReplace = Math.round((float) a.length * (p / 100f));
-            List<Integer> replacedIndexes = new ArrayList<Integer>();
+
             while (replacedIndexes.size() < charToReplace) {
                 Integer index;
                 do {
@@ -313,7 +333,7 @@ public class QuizMaster3000 extends JavaPlugin {
             hint.add(new String(a));
         }
 
-        return StringUtils.join(hint, ", or ");
+        return StringUtils.join(hint, messages.getString("quiz.answer.joiner"));
     }
 
 

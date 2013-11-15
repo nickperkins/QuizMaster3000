@@ -22,9 +22,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class QuizMaster3000Listener implements Listener {
+class QuizMaster3000Listener implements Listener {
 
-    private QuizMaster3000 plugin;
+    private final QuizMaster3000 plugin;
 
     public QuizMaster3000Listener(QuizMaster3000 plugin) {
         this.plugin = plugin;
@@ -42,8 +42,8 @@ public class QuizMaster3000Listener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (plugin.scores.containsKey(player)) {
-            plugin.scores.remove(player);
+        if (plugin.getScores().containsKey(player)) {
+            plugin.getScores().remove(player);
         }
     }
 

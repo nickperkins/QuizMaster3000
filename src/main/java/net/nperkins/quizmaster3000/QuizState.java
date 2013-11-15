@@ -16,6 +16,6 @@ You should have received a copy of the GNU General Public License
 along with QuizMaster3000.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-public enum QuizState {
+enum QuizState {
     REGISTRATION, ASKQUESTION, GETANSWER, WAITFORNEXT, FINISHED,
 }
