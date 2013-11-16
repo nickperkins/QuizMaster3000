@@ -33,8 +33,31 @@ Configuration
 
 Configuration is pretty self-explainitory
 
-* Color codes can be used in the prefix
-* autorun delay is in seconds
+```
+general:
+  prefix: '&d[Quiz]&f' # can contain color codes
+  locale: 'en_AU' # defaults to Australian English
+quiz:
+  winningScore: 5 # when score reached quiz is ended
+  hints: true # show hints during question countdown
+  autorun:
+    default: false # whether to autorun quiz (/quiz autorun) when using /quiz start
+    delay: 300 # in seconds
+```
+
+Localisation (from v0.4.0)
+--------------------------
+Localisation is now possible, however the plugin contains no translations as yet. If you are willing to help translate it, please leave me a message.
+
+If you do not set a locale in the config.yml it will use the system's default locale. If the locale doesn't have a translation it will default to Australian English.
+
+Set your locale via the general.prefix setting in config.yml. For example:
+
+```
+# For German
+general:
+  locale: 'de_DE'
+```
 
 Question file format
 --------------------
@@ -43,25 +66,3 @@ The question file is a bar (|) delimited file. The first field is the question a
 
 For examples, look at the questions file (questions.dat) provided with the plugin.
 
-Changelog
----------
-**Version v0.2**
-* Add configuration options - see config.yml (will generate on first run)
-* Autorun quizes every x seconds using /quizadmin autorun (defined in config.yml - default 5 minutes)
-
-**Version v0.1.2**
-* Fixed a bug where quiz threads would run after plugin was disabled or reloaded
-* Quizes stop running if no players have joined or if all quiz players leave
-
-**Version v0.1.1**
-* Initial version
-
-ToDo
-----
-
-This is very much a work in progress. Some features to come include:
-* ~~Configurable prefix.~~ Added v0.2
-* Configure the time periods for registration, answering questions, etc.
-* Use in-game scoreboards to display the scores.
-* Use multiple question files, with the questions selected when a quiz is started.
-* Proper permissions nodes
