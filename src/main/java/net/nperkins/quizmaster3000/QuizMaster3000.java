@@ -341,14 +341,17 @@ public class QuizMaster3000 extends JavaPlugin {
                         getServer().broadcastMessage(MessageFormat.format(messages.getString("quiz.question.playercorrect"), ChatColor.GREEN, player.getName()));
                         scores.put(player, scores.get(player) + 1);
                         if (scores.get(player) == config.getInt("quiz.winningScore")) { //NON-NLS
+                            state = QuizState.FINISHED;
                             finishQuiz();
                         } else {
+                            state = QuizState.WAITFORNEXT;
+                            getServer().broadcastMessage(prefixMessage(messages.getString("quiz.question.next")));
                             waitForNextRunnable.start();
                         }
+                    } else {
+                        getServer().broadcastMessage(prefixMessage(messages.getString("error.notplaying")));
                     }
                 }
-            } else {
-                getServer().broadcastMessage(prefixMessage(messages.getString("error.notplaying")));
             }
         }
     }

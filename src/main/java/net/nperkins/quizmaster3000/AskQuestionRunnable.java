@@ -57,14 +57,15 @@ class AskQuestionRunnable implements Runnable {
                     plugin.getAutoRunRunnable().start();
                 }
             } else {
-                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.question.next")));
                 plugin.setState(QuizState.WAITFORNEXT);
                 Bukkit.getScheduler().cancelTask(id);
+                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.question.next")));
                 plugin.getWaitForNextRunnable().start();
             }
         } else {
             plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.timeleft"), timer)));
-            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.hint"), plugin.getHint(timer * 2))));
+            if (plugin.getConfig().getBoolean("quiz.hints"))
+                plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.hint"), plugin.getHint(timer * 2))));
             timer -= 15;
         }
     }
