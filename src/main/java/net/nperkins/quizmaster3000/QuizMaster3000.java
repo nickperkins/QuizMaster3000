@@ -23,6 +23,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mcstats.Metrics;
 
 import java.io.*;
 import java.text.MessageFormat;
@@ -118,6 +119,14 @@ public class QuizMaster3000 extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
+        //Metrics
+        try {
+            Metrics metrics = new Metrics(this);
+            metrics.start();
+        } catch (IOException e) {
+            // Failed to submit the stats :-(
+        }
 
         processConfig();
 
