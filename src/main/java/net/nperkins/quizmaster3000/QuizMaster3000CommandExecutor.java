@@ -104,7 +104,7 @@ class QuizMaster3000CommandExecutor implements CommandExecutor {
                 return true;
             }
             if (args[0].equalsIgnoreCase("help")) { //NON-NLS
-                String help = plugin.getMessages().getString("quizadmin.help");
+                String[] help = plugin.getMessages().getString("quizadmin.help").split(",");
                 sender.sendMessage(help);
                 return true;
             }

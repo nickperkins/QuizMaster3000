@@ -237,8 +237,8 @@ public class QuizMaster3000 extends JavaPlugin {
 
         BufferedReader br = new BufferedReader(new FileReader(quizfilepath));
         String line;
-        Question thisLine = new Question();
         while ((line = br.readLine()) != null) {
+            Question thisLine = new Question();
             String[] splitLine = line.split("\\|");
             thisLine.setQuestion(splitLine[0]);
             thisLine.setAnswer((String[]) ArrayUtils.subarray(splitLine, 1, splitLine.length));
@@ -290,7 +290,7 @@ public class QuizMaster3000 extends JavaPlugin {
     void finishQuiz() {
         if (scores.size() != 0) {
             Map<Player, Integer> sortedScores = Util.sortScores(scores);
-            getServer().broadcastMessage(prefixMessage(prefixMessage("---------- " + messages.getString("quiz.scores.final") + " ----------")));
+            getServer().broadcastMessage(prefixMessage("---------- " + messages.getString("quiz.scores.final") + " ----------"));
             for (Map.Entry<Player, Integer> score : sortedScores.entrySet()) {
                 getServer().broadcastMessage(prefixMessage(MessageFormat.format(messages.getString("quiz.scores.points"), score.getKey().getName(), score.getValue())));
             }
