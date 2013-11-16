@@ -65,7 +65,7 @@ class QuizMaster3000CommandExecutor implements CommandExecutor {
                 }
             }
             if (args[0].equalsIgnoreCase("scores")) { //NON-NLS
-                plugin.displayScores((Player) sender);
+                plugin.displayScores(sender);
                 return true;
             }
             if (args[0].equalsIgnoreCase("help")) { //NON-NLS

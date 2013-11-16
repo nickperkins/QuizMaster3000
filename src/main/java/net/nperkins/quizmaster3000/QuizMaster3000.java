@@ -17,9 +17,11 @@ package net.nperkins.quizmaster3000;
  */
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,7 +35,6 @@ public class QuizMaster3000 extends JavaPlugin {
 
     // Localisation
     private ResourceBundle messages;
-    private static Locale locale;
 
     // Configuration
     private FileConfiguration config = null;
@@ -64,23 +65,40 @@ public class QuizMaster3000 extends JavaPlugin {
         setLocale(Locale.getDefault());
     }
 
-    public static Locale getLocale() {
-        return locale;
-    }
-
-    void setLocale(Locale l) {
-        locale = l;
+    /**
+     * Set the locale to be used
+     *
+     * @param l a Locale
+     */
+    private void setLocale(Locale l) {
         messages = ResourceBundle.getBundle("Messages", l); //NON-NLS
+        if (!messages.getLocale().toString().isEmpty())
+            getLogger().info(MessageFormat.format(messages.getString("plugin.localeloaded"), messages.getLocale()));
     }
 
+    /**
+     * Gets the currently loaded ResourceBundle
+     *
+     * @return a ResourceBundle
+     */
     public ResourceBundle getMessages() {
         return messages;
     }
 
+    /**
+     * Get the current state of the quiz
+     *
+     * @return a {@link QuizState}
+     */
     public QuizState getState() {
         return state;
     }
 
+    /**
+     * Set the state of the quiz
+     *
+     * @param state a {@link QuizState}
+     */
     public void setState(QuizState state) {
         this.state = state;
     }
@@ -130,6 +148,11 @@ public class QuizMaster3000 extends JavaPlugin {
 
         processConfig();
 
+        // Set locale if available
+        if (config.isSet("general.locale")) {
+            setLocale(LocaleUtils.toLocale(config.getString("general.locale")));
+        }
+
         String quizfilepath = this.getDataFolder() + File.separator + "questions.dat"; //NON-NLS
 
         this.checkQuestions(quizfilepath);
@@ -156,6 +179,9 @@ public class QuizMaster3000 extends JavaPlugin {
         }
     }
 
+    /**
+     * Process the plugin configuration
+     */
     void processConfig() {
         final Map<String, Object> defParams = new LinkedHashMap<String, Object>();
 
@@ -180,8 +206,13 @@ public class QuizMaster3000 extends JavaPlugin {
         this.saveConfig();
     }
 
+    /**
+     * Start a quiz
+     */
     public void startQuiz() {
         if (!isRunning) {
+            // If we are interrupting an autorun, we need to cancel that task first
+            getServer().getScheduler().cancelTasks(this);
             if (config.getBoolean("quiz.autorun.default")) autoRun = true; //NON-NLS
             state = QuizState.REGISTRATION;
             isRunning = true;
@@ -189,7 +220,9 @@ public class QuizMaster3000 extends JavaPlugin {
         }
     }
 
-
+    /**
+     * Start an autorun quiz
+     */
     public void startAutoQuiz() {
         if (!isRunning) {
             autoRun = true;
@@ -199,6 +232,9 @@ public class QuizMaster3000 extends JavaPlugin {
         }
     }
 
+    /**
+     * Stop the currently running quiz, and any autoquiz wait period
+     */
     public void stopQuiz() {
         state = QuizState.FINISHED;
         autoRun = false;  // In case it is auto running
@@ -209,6 +245,11 @@ public class QuizMaster3000 extends JavaPlugin {
 
     }
 
+    /**
+     * Check for question database file and save default questions if none exist
+     *
+     * @param filePath Location to check for question database file
+     */
     private void checkQuestions(String filePath) {
 
         File quizFile = new File(filePath);
@@ -217,6 +258,7 @@ public class QuizMaster3000 extends JavaPlugin {
 
             if (!quizFile.exists()) {
                 try {
+                    //noinspection ResultOfMethodCallIgnored
                     quizFile.createNewFile();
                     InputStream in = (getClass().getResourceAsStream("/questions.dat")); //NON-NLS
                     FileOutputStream out = new FileOutputStream(quizFile);
@@ -233,13 +275,22 @@ public class QuizMaster3000 extends JavaPlugin {
         }
     }
 
+    /**
+     * Load questions from a quizfile
+     *
+     * @param quizfilepath File path of quizfile
+     * @throws IOException
+     */
     private void loadQuestions(String quizfilepath) throws IOException {
-
         BufferedReader br = new BufferedReader(new FileReader(quizfilepath));
         String line;
         while ((line = br.readLine()) != null) {
             Question thisLine = new Question();
             String[] splitLine = line.split("\\|");
+            if (splitLine.length < 2) {
+                getLogger().info(prefixMessage(messages.getString("error.invalidquestion")));
+                continue;
+            }
             thisLine.setQuestion(splitLine[0]);
             thisLine.setAnswer((String[]) ArrayUtils.subarray(splitLine, 1, splitLine.length));
             questions.add(thisLine);
@@ -247,11 +298,20 @@ public class QuizMaster3000 extends JavaPlugin {
         br.close();
     }
 
+    /**
+     * Prefix messages with configured prefix text
+     *
+     * @param message Mesasge to be prefixed
+     * @return message with prefix added
+     */
     public String prefixMessage(String message) {
         message = ChatColor.translateAlternateColorCodes('&', config.getString("general.prefix") + ' ' + message); //NON-NLS
         return message;
     }
 
+    /**
+     * Ask a random question without repeating the last one
+     */
     public void askQuestion() {
         Random ran = new Random();
         Integer thisNumber;
@@ -265,6 +325,12 @@ public class QuizMaster3000 extends JavaPlugin {
         state = QuizState.GETANSWER;
     }
 
+    /**
+     * Checks chat during a quiz for correct answers from players
+     *
+     * @param player  Player who sent the chat message
+     * @param message Chat message
+     */
     public void checkAnswer(Player player, String message) {
 
         if (state == QuizState.GETANSWER) {
@@ -282,11 +348,14 @@ public class QuizMaster3000 extends JavaPlugin {
                     }
                 }
             } else {
-                getServer().broadcastMessage(messages.getString("error.notplaying"));
+                getServer().broadcastMessage(prefixMessage(messages.getString("error.notplaying")));
             }
         }
     }
 
+    /**
+     * Finish a quiz and display the final scores
+     */
     void finishQuiz() {
         if (scores.size() != 0) {
             Map<Player, Integer> sortedScores = Util.sortScores(scores);
@@ -303,20 +372,33 @@ public class QuizMaster3000 extends JavaPlugin {
         }
     }
 
-    public void displayScores(Player p) {
+    /**
+     * Display scores to a player on request
+     *
+     * @param s CommandSender requesting score
+     */
+    public void displayScores(CommandSender s) {
         if (scores.size() != 0) {
             Map<Player, Integer> sortedScores = Util.sortScores(scores);
-            p.sendMessage(prefixMessage("---------- " + messages.getString("quiz.scores.interim") + " ----------"));
+            s.sendMessage(prefixMessage("---------- " + messages.getString("quiz.scores.interim") + " ----------"));
             for (Map.Entry<Player, Integer> score : sortedScores.entrySet()) {
-                p.sendMessage(prefixMessage(prefixMessage(MessageFormat.format(messages.getString("quiz.scores.points"), score.getKey().getName(), score.getValue()))));
+                s.sendMessage(prefixMessage(MessageFormat.format(messages.getString("quiz.scores.points"), score.getKey().getName(), score.getValue())));
             }
         } else {
-            p.sendMessage(prefixMessage(messages.getString("error.noscores")));
+            s.sendMessage(prefixMessage(messages.getString("error.noscores")));
         }
     }
 
+    /**
+     * Generate a hint string for the current question
+     *
+     * @param p Percentage of answer to hide
+     * @return Answer with percentage of answer hidden by '*'
+     * @throws IllegalArgumentException
+     */
     public String getHint(Integer p) throws IllegalArgumentException {
 
+        // If more than 100 we get a result that won't work
         if (p > 100) {
             throw new IllegalArgumentException();
         }

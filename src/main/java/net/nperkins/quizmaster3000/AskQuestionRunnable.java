@@ -51,6 +51,11 @@ class AskQuestionRunnable implements Runnable {
                 plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("error.allplayersleft")));
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.setState(QuizState.FINISHED);
+                plugin.setRunning(false);
+                if (plugin.getAutoRun()) {
+                    plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.autorun.nextgame")));
+                    plugin.getAutoRunRunnable().start();
+                }
             } else {
                 plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.question.next")));
                 plugin.setState(QuizState.WAITFORNEXT);
