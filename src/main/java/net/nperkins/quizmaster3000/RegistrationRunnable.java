@@ -53,7 +53,7 @@ class RegistrationRunnable implements Runnable {
                     plugin.getAutoRunRunnable().start();
                 }
             } else {
-                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.registration.finished")));
+                plugin.sendPlayers(plugin.getMessages().getString("quiz.registration.finished"));
                 plugin.setState(QuizState.WAITFORNEXT);
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.getWaitForNextRunnable().start();

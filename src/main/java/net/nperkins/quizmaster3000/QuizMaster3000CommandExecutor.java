@@ -73,6 +73,14 @@ class QuizMaster3000CommandExecutor implements CommandExecutor {
                 sender.sendMessage(help);
                 return true;
             }
+            if (args[0].equalsIgnoreCase("leave")) {
+
+                if (plugin.getScores().containsKey(sender)) {
+                    plugin.getScores().remove(sender);
+                }
+                sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.leave")));
+                return true;
+            }
         }
         return false;
     }

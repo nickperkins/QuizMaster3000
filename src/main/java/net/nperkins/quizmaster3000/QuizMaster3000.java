@@ -162,6 +162,9 @@ public class QuizMaster3000 extends JavaPlugin {
             e.printStackTrace();
         }
 
+        // Set default state
+        state = QuizState.FINISHED;
+
         // Register CommandExecutor
         getCommand("quiz").setExecutor(commandExecutor); //NON-NLS
         getCommand("quizadmin").setExecutor(commandExecutor); //NON-NLS
@@ -239,8 +242,8 @@ public class QuizMaster3000 extends JavaPlugin {
         state = QuizState.FINISHED;
         autoRun = false;  // In case it is auto running
         getServer().getScheduler().cancelTasks(this);
+        sendPlayers(messages.getString("quiz.stopped"));
         scores = new HashMap<Player, Integer>();
-        getServer().broadcastMessage(messages.getString("quiz.stopped"));
         isRunning = false;
 
     }
@@ -321,7 +324,7 @@ public class QuizMaster3000 extends JavaPlugin {
         lastQuestion = thisNumber;
         currentQuestion = questions.get(thisNumber);
 
-        getServer().broadcastMessage(prefixMessage(MessageFormat.format(messages.getString("quiz.question.question"), currentQuestion.getQuestion())));
+        sendPlayers(MessageFormat.format(messages.getString("quiz.question.question"), currentQuestion.getQuestion()));
         state = QuizState.GETANSWER;
     }
 
@@ -332,25 +335,18 @@ public class QuizMaster3000 extends JavaPlugin {
      * @param message Chat message
      */
     public void checkAnswer(Player player, String message) {
-
-        if (state == QuizState.GETANSWER) {
-            if (scores.containsKey(player)) {
-                for (String a : currentQuestion.getAnswer()) {
-                    if (message.equalsIgnoreCase(a)) {
-                        getServer().getScheduler().cancelTask(questionRunnable.getID());
-                        getServer().broadcastMessage(MessageFormat.format(messages.getString("quiz.question.playercorrect"), ChatColor.GREEN, player.getName()));
-                        scores.put(player, scores.get(player) + 1);
-                        if (scores.get(player) == config.getInt("quiz.winningScore")) { //NON-NLS
-                            state = QuizState.FINISHED;
-                            finishQuiz();
-                        } else {
-                            state = QuizState.WAITFORNEXT;
-                            getServer().broadcastMessage(prefixMessage(messages.getString("quiz.question.next")));
-                            waitForNextRunnable.start();
-                        }
-                    } else {
-                        getServer().broadcastMessage(prefixMessage(messages.getString("error.notplaying")));
-                    }
+        for (String a : currentQuestion.getAnswer()) {
+            if (message.equalsIgnoreCase(a)) {
+                getServer().getScheduler().cancelTask(questionRunnable.getID());
+                sendPlayers(MessageFormat.format(messages.getString("quiz.question.playercorrect"), ChatColor.GREEN, player.getName()));
+                scores.put(player, scores.get(player) + 1);
+                if (scores.get(player) == config.getInt("quiz.winningScore")) { //NON-NLS
+                    state = QuizState.FINISHED;
+                    finishQuiz();
+                } else {
+                    state = QuizState.WAITFORNEXT;
+                    sendPlayers(messages.getString("quiz.question.next"));
+                    waitForNextRunnable.start();
                 }
             }
         }
@@ -362,9 +358,9 @@ public class QuizMaster3000 extends JavaPlugin {
     void finishQuiz() {
         if (scores.size() != 0) {
             Map<Player, Integer> sortedScores = Util.sortScores(scores);
-            getServer().broadcastMessage(prefixMessage("---------- " + messages.getString("quiz.scores.final") + " ----------"));
+            sendPlayers("---------- " + messages.getString("quiz.scores.final") + " ----------");
             for (Map.Entry<Player, Integer> score : sortedScores.entrySet()) {
-                getServer().broadcastMessage(prefixMessage(MessageFormat.format(messages.getString("quiz.scores.points"), score.getKey().getName(), score.getValue())));
+                sendPlayers(MessageFormat.format(messages.getString("quiz.scores.points"), score.getKey().getName(), score.getValue()));
             }
             scores = new HashMap<Player, Integer>();
             isRunning = false;
@@ -428,6 +424,14 @@ public class QuizMaster3000 extends JavaPlugin {
         }
 
         return StringUtils.join(hint, messages.getString("quiz.answer.joiner"));
+    }
+
+    public void sendPlayers(String message) {
+
+        for (Player p : scores.keySet()) {
+            p.sendMessage(prefixMessage(message));
+        }
+
     }
 
 

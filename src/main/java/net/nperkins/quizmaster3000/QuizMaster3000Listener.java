@@ -32,11 +32,26 @@ class QuizMaster3000Listener implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
+        if (plugin.getState() != QuizState.FINISHED) {
+            if (plugin.getScores().containsKey(event.getPlayer())) {
+                event.setCancelled(true);
+                if (event.isAsynchronous())
+                    plugin.getServer().getScheduler().callSyncMethod(plugin, new CallableSendMessage(plugin, String.format("<%s> %s", event.getPlayer().getName(), event.getMessage())));
+                else
+                    plugin.sendPlayers(String.format("<%s> %s", event.getPlayer().getName(), event.getMessage()));
 
-        if (event.isAsynchronous())
-            plugin.getServer().getScheduler().callSyncMethod(plugin, new CallableCheckAnswer(event.getPlayer(), plugin, event.getMessage()));
-        else
-            plugin.checkAnswer(event.getPlayer(), event.getMessage());
+            }
+        }
+        if (plugin.getState() == QuizState.GETANSWER) {
+            if (plugin.getScores().containsKey(event.getPlayer())) {
+                if (event.isAsynchronous())
+                    plugin.getServer().getScheduler().callSyncMethod(plugin, new CallableCheckAnswer(event.getPlayer(), plugin, event.getMessage()));
+                else
+                    plugin.checkAnswer(event.getPlayer(), event.getMessage());
+
+            }
+
+        }
     }
 
     @EventHandler

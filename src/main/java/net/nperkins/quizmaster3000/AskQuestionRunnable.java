@@ -45,8 +45,8 @@ class AskQuestionRunnable implements Runnable {
     public void run() {
         if (timer <= 0) {
             Bukkit.getScheduler().cancelTask(id);
-            plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.question.timeup")));
-            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.answer"), StringUtils.join(Arrays.copyOfRange(plugin.getCurrentQuestion().getAnswer(), 0, plugin.getCurrentQuestion().getAnswer().length), plugin.getMessages().getString("quiz.answer.joiner")))));
+            plugin.sendPlayers(plugin.getMessages().getString("quiz.question.timeup"));
+            plugin.getServer().broadcastMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.answer"), StringUtils.join(Arrays.copyOfRange(plugin.getCurrentQuestion().getAnswer(), 0, plugin.getCurrentQuestion().getAnswer().length), plugin.getMessages().getString("quiz.answer.joiner"))));
             if (plugin.getScores().size() == 0) {
                 plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("error.allplayersleft")));
                 Bukkit.getScheduler().cancelTask(id);
@@ -59,13 +59,13 @@ class AskQuestionRunnable implements Runnable {
             } else {
                 plugin.setState(QuizState.WAITFORNEXT);
                 Bukkit.getScheduler().cancelTask(id);
-                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.question.next")));
+                plugin.sendPlayers(plugin.getMessages().getString("quiz.question.next"));
                 plugin.getWaitForNextRunnable().start();
             }
         } else {
-            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.timeleft"), timer)));
+            plugin.sendPlayers(MessageFormat.format(plugin.getMessages().getString("quiz.question.timeleft"), timer));
             if (plugin.getConfig().getBoolean("quiz.hints"))
-                plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.hint"), plugin.getHint(timer * 2))));
+                plugin.sendPlayers(MessageFormat.format(plugin.getMessages().getString("quiz.question.hint"), plugin.getHint(timer * 2)));
             timer -= 15;
         }
     }
