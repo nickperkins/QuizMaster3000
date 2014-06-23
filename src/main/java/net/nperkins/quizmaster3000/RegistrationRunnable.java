@@ -48,10 +48,7 @@ class RegistrationRunnable implements Runnable {
                 plugin.setState(QuizState.FINISHED);
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.setRunning(false);
-                if (plugin.getAutoRun()) {
-                    plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.autorun.nextgame")));
-                    plugin.getAutoRunRunnable().start();
-                }
+
             } else {
                 plugin.sendPlayers(plugin.getMessages().getString("quiz.registration.finished"));
                 plugin.setState(QuizState.WAITFORNEXT);
