@@ -19,6 +19,7 @@ package net.nperkins.quizmaster3000;
  */
 
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.MessageFormat;
 
@@ -35,7 +36,12 @@ class RegistrationRunnable implements Runnable {
 
 
     public void start() {
-        plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.registration.start")));
+        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new BukkitRunnable() {
+            @Override
+            public void run() {
+                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.registration.start")));
+            }
+        });
         id = Bukkit.getScheduler().runTaskTimer(plugin, this, 15 * 20, 15 * 20).getTaskId();
         timer = 45;
     }
@@ -44,7 +50,13 @@ class RegistrationRunnable implements Runnable {
     public void run() {
         if (timer <= 0) {
             if (plugin.getScores().size() == 0) {
-                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.registration.noplayersjoined")));
+                plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.registration.noplayersjoined")));
+                            }
+                        });
+
                 plugin.setState(QuizState.FINISHED);
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.setRunning(false);
@@ -56,7 +68,12 @@ class RegistrationRunnable implements Runnable {
                 plugin.getWaitForNextRunnable().start();
             }
         } else {
-            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.registration.timer"), timer)));
+            plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.registration.timer"), timer)));
+                        }
+                    });
             timer -= 15;
         }
     }
