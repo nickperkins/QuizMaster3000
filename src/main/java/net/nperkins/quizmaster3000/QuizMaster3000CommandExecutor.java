@@ -98,6 +98,7 @@ class QuizMaster3000CommandExecutor implements CommandExecutor {
             if (args[0].equalsIgnoreCase("stop")) { //NON-NLS
                 if (plugin.getState() != QuizState.FINISHED || plugin.getRunning()) {
                     plugin.stopQuiz();
+                    sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.stopped")));
                 } else {
                     sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.noquizrunning")));
                 }
