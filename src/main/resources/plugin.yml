@@ -3,13 +3,13 @@ main: net.nperkins.quizmaster3000.QuizMaster3000
 version: 0.5.0
 
 commands:
-  quiz:
+  qm:
       description: QuizMaster3000
       aliases: [trivia]
       permission: quizmaster3000.quiz
       permission-message: You don't have <permission>
       usage: Type /<command> help for more details!
-  quizadmin:
+  qmadmin:
       description: QuizMaster3000 Admin
       aliases: [triviaadmin]
       permission: quizmaster3000.admin

@@ -31,10 +31,10 @@ class QuizMaster3000CommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("quiz")) { //NON-NLS
+        if (cmd.getName().equalsIgnoreCase("qm")) { //NON-NLS
             return commandQuiz(sender, args);
         }
-        if (cmd.getName().equalsIgnoreCase("quizadmin")) { //NON-NLS
+        if (cmd.getName().equalsIgnoreCase("qmadmin")) { //NON-NLS
             return commandQuizAdmin(sender, args);
         }
         return false;
