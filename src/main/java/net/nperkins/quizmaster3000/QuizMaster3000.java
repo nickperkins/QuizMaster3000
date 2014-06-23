@@ -166,8 +166,8 @@ public class QuizMaster3000 extends JavaPlugin {
         state = QuizState.FINISHED;
 
         // Register CommandExecutor
-        getCommand("quiz").setExecutor(commandExecutor); //NON-NLS
-        getCommand("quizadmin").setExecutor(commandExecutor); //NON-NLS
+        getCommand("qm").setExecutor(commandExecutor); //NON-NLS
+        getCommand("qmadmin").setExecutor(commandExecutor); //NON-NLS
 
         // Register Listener
         getServer().getPluginManager().registerEvents(listener, this);
