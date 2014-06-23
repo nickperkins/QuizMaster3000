@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with QuizMaster3000.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -36,9 +37,9 @@ class QuizMaster3000Listener implements Listener {
             if (plugin.getScores().containsKey(event.getPlayer())) {
                 event.setCancelled(true);
                 if (event.isAsynchronous())
-                    plugin.getServer().getScheduler().callSyncMethod(plugin, new CallableSendMessage(plugin, String.format("<%s> %s", event.getPlayer().getName(), event.getMessage())));
+                    plugin.getServer().getScheduler().callSyncMethod(plugin, new CallableSendMessage(plugin, ChatColor.translateAlternateColorCodes('&',String.format("&6[%s]&r<%s> %s", plugin.getScores().get(event.getPlayer()), event.getPlayer().getName(), event.getMessage()))));
                 else
-                    plugin.sendPlayers(String.format("<%s> %s", event.getPlayer().getName(), event.getMessage()));
+                    plugin.sendPlayers(ChatColor.translateAlternateColorCodes('&',String.format("&6[%s]&r<%s> %s", plugin.getScores().get(event.getPlayer()),event.getPlayer().getName(), event.getMessage())));
 
             }
         }
