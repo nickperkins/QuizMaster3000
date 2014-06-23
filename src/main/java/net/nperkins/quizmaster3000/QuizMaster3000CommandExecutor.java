@@ -47,7 +47,7 @@ class QuizMaster3000CommandExecutor implements CommandExecutor {
                     sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.notplayer")));
                 } else {
                     if (plugin.getState() == QuizState.REGISTRATION) {
-                        if (plugin.getScores().containsKey((Player) sender)) {
+                        if (plugin.getScores().containsKey(sender)) {
                             sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.alreadyjoined")));
                             return true;
                         } else {
@@ -101,14 +101,6 @@ class QuizMaster3000CommandExecutor implements CommandExecutor {
                     sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.stopped")));
                 } else {
                     sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.noquizrunning")));
-                }
-                return true;
-            }
-            if (args[0].equalsIgnoreCase("autorun")) { //NON-NLS
-                if (plugin.getState() == QuizState.FINISHED) {
-                    plugin.startAutoQuiz();
-                } else {
-                    sender.sendMessage(plugin.prefixMessage(plugin.getMessages().getString("error.alreadystarted")));
                 }
                 return true;
             }

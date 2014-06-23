@@ -46,17 +46,12 @@ class AskQuestionRunnable implements Runnable {
         if (timer <= 0) {
             Bukkit.getScheduler().cancelTask(id);
             plugin.sendPlayers(plugin.getMessages().getString("quiz.question.timeup"));
-            plugin.getServer().broadcastMessage(MessageFormat.format(plugin.getMessages().getString("quiz.question.answer"), StringUtils.join(Arrays.copyOfRange(plugin.getCurrentQuestion().getAnswer(), 0, plugin.getCurrentQuestion().getAnswer().length), plugin.getMessages().getString("quiz.answer.joiner"))));
+            plugin.sendPlayers(MessageFormat.format(plugin.getMessages().getString("quiz.question.answer"), StringUtils.join(Arrays.copyOfRange(plugin.getCurrentQuestion().getAnswer(), 0, plugin.getCurrentQuestion().getAnswer().length), plugin.getMessages().getString("quiz.answer.joiner"))));
             if (plugin.getScores().size() == 0) {
-                plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("error.allplayersleft")));
+                plugin.sendPlayers(plugin.prefixMessage(plugin.getMessages().getString("error.allplayersleft")));
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.setState(QuizState.FINISHED);
                 plugin.setRunning(false);
-                if (plugin.getAutoRun()) {
-                    plugin.getServer().broadcastMessage(plugin.prefixMessage(plugin.getMessages().getString("quiz.autorun.nextgame")));
-                    plugin.getAutoRunRunnable().start();
-                }
-            } else {
                 plugin.setState(QuizState.WAITFORNEXT);
                 Bukkit.getScheduler().cancelTask(id);
                 plugin.sendPlayers(plugin.getMessages().getString("quiz.question.next"));

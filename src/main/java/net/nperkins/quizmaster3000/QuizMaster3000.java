@@ -47,12 +47,10 @@ public class QuizMaster3000 extends JavaPlugin {
     private final RegistrationRunnable registrationRunnable = new RegistrationRunnable(this);
     private final AskQuestionRunnable questionRunnable = new AskQuestionRunnable(this);
     private final WaitForNextRunnable waitForNextRunnable = new WaitForNextRunnable(this);
-    private final AutoRunRunnable autoRunRunnable = new AutoRunRunnable(this);
 
 
     // Quiz status info
     private QuizState state = QuizState.FINISHED;
-    private Boolean autoRun = false;
     private Boolean isRunning = false;
 
     // Quiz game information
@@ -115,10 +113,6 @@ public class QuizMaster3000 extends JavaPlugin {
         return waitForNextRunnable;
     }
 
-    public AutoRunRunnable getAutoRunRunnable() {
-        return autoRunRunnable;
-    }
-
     public Boolean getRunning() {
         return isRunning;
     }
@@ -129,10 +123,6 @@ public class QuizMaster3000 extends JavaPlugin {
 
     public Question getCurrentQuestion() {
         return currentQuestion;
-    }
-
-    public Boolean getAutoRun() {
-        return autoRun;
     }
 
     @Override
@@ -195,8 +185,6 @@ public class QuizMaster3000 extends JavaPlugin {
         defParams.put("general.prefix", "&d[Quiz]&f"); //NON-NLS NON-NLS
         defParams.put("quiz.winningScore", 5); //NON-NLS
         defParams.put("quiz.hints", true); //NON-NLS
-        defParams.put("quiz.autorun.default", false); //NON-NLS
-        defParams.put("quiz.autorun.delay", 300); //NON-NLS
 
         // If config does not include a default parameter, add it
         for (final Map.Entry<String, Object> e : defParams.entrySet()) {
@@ -214,21 +202,6 @@ public class QuizMaster3000 extends JavaPlugin {
      */
     public void startQuiz() {
         if (!isRunning) {
-            // If we are interrupting an autorun, we need to cancel that task first
-            getServer().getScheduler().cancelTasks(this);
-            if (config.getBoolean("quiz.autorun.default")) autoRun = true; //NON-NLS
-            state = QuizState.REGISTRATION;
-            isRunning = true;
-            registrationRunnable.start();
-        }
-    }
-
-    /**
-     * Start an autorun quiz
-     */
-    public void startAutoQuiz() {
-        if (!isRunning) {
-            autoRun = true;
             state = QuizState.REGISTRATION;
             isRunning = true;
             registrationRunnable.start();
@@ -240,7 +213,6 @@ public class QuizMaster3000 extends JavaPlugin {
      */
     public void stopQuiz() {
         state = QuizState.FINISHED;
-        autoRun = false;  // In case it is auto running
         getServer().getScheduler().cancelTasks(this);
         sendPlayers(messages.getString("quiz.stopped"));
         scores = new HashMap<Player, Integer>();
@@ -365,10 +337,6 @@ public class QuizMaster3000 extends JavaPlugin {
             scores = new HashMap<Player, Integer>();
             isRunning = false;
         }
-        if (autoRun) {
-            getServer().broadcastMessage(prefixMessage(messages.getString("quiz.autorun.nextgame")));
-            autoRunRunnable.start();
-        }
     }
 
     /**
@@ -433,7 +401,6 @@ public class QuizMaster3000 extends JavaPlugin {
         }
 
     }
-
 
 }
 
