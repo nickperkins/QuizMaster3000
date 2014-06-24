@@ -69,11 +69,16 @@ class RegistrationRunnable implements Runnable {
             }
         } else {
             plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new BukkitRunnable() {
+                        int curTime;
                         @Override
                         public void run() {
-                            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.registration.timer"), timer)));
+                            plugin.getServer().broadcastMessage(plugin.prefixMessage(MessageFormat.format(plugin.getMessages().getString("quiz.registration.timer"), curTime)));
                         }
-                    });
+                        private BukkitRunnable init(int var) {
+                            curTime = var;
+                            return this;
+                        }
+                    }.init(timer));
             timer -= 15;
         }
     }
