@@ -20,7 +20,10 @@ class CallableCheckAnswer implements Callable<Object> {
 
     @Override
     public Object call() throws Exception {
-        plugin.checkAnswer(player, message);
+        // Confirm we are still waiting for an answer
+        if (plugin.getState() == QuizState.ASKQUESTION) {
+            plugin.checkAnswer(player, message);
+        }
         return null;
     }
 }
