@@ -29,7 +29,7 @@ class WaitForNextRunnable implements Runnable {
     }
 
     public void start() {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this, 5 * 20);
+        Bukkit.getScheduler().runTaskLater(plugin, this, 5 * 20);
     }
 
     @Override
