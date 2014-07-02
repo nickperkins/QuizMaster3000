@@ -320,6 +320,7 @@ public class QuizMaster3000 extends JavaPlugin {
                     sendPlayers(messages.getString("quiz.question.next"));
                     waitForNextRunnable.start();
                 }
+                break;
             }
         }
     }
