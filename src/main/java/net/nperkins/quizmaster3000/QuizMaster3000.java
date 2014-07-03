@@ -58,7 +58,8 @@ public class QuizMaster3000 extends JavaPlugin {
     private HashMap<Player, Integer> scores = new HashMap<Player, Integer>();
     private final ArrayList<Question> questions = new ArrayList<Question>();
     private Question currentQuestion = null;
-    private Integer lastQuestion = null;
+    private ArrayList<Integer> usedQuestions = new ArrayList<Integer>();
+
 
     public QuizMaster3000() {
         setLocale(Locale.getDefault());
@@ -293,8 +294,8 @@ public class QuizMaster3000 extends JavaPlugin {
         Integer thisNumber;
         do {
             thisNumber = ran.nextInt(questions.size());
-        } while (thisNumber.equals(lastQuestion));
-        lastQuestion = thisNumber;
+        } while (!usedQuestions.contains(thisNumber));
+        usedQuestions.add(thisNumber);
         currentQuestion = questions.get(thisNumber);
 
         sendPlayers(MessageFormat.format(messages.getString("quiz.question.question"), currentQuestion.getQuestion()));
@@ -339,7 +340,8 @@ public class QuizMaster3000 extends JavaPlugin {
             for (Map.Entry<Player, Integer> score : sortedScores.entrySet()) {
                 sendPlayers(MessageFormat.format(messages.getString("quiz.scores.points"), score.getKey().getName(), score.getValue()));
             }
-            scores = new HashMap<Player, Integer>();
+            scores.clear();
+            usedQuestions.clear();
             isRunning = false;
         }
     }
