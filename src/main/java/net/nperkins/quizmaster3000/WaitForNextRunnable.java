@@ -20,6 +20,8 @@ package net.nperkins.quizmaster3000;
 
 import org.bukkit.Bukkit;
 
+import java.util.logging.Level;
+
 class WaitForNextRunnable implements Runnable {
 
     private final QuizMaster3000 plugin;
@@ -34,6 +36,7 @@ class WaitForNextRunnable implements Runnable {
 
     @Override
     public void run() {
+        plugin.getLogger().log(Level.INFO,plugin.prefixMessage("Waiting to ask next question"));
         plugin.setState(QuizState.ASKQUESTION);
         plugin.getQuestionRunnable().start();
     }

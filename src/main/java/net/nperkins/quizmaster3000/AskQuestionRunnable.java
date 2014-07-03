@@ -23,6 +23,7 @@ import org.bukkit.Bukkit;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.logging.Level;
 
 class AskQuestionRunnable implements Runnable {
 
@@ -36,6 +37,7 @@ class AskQuestionRunnable implements Runnable {
 
 
     public void start() {
+        plugin.getLogger().log(Level.INFO,"Asking next question.");
         timer = 45;
         plugin.askQuestion();
         id = Bukkit.getScheduler().runTaskTimer(plugin, this, 15 * 20, 15 * 20).getTaskId();

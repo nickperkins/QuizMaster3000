@@ -30,6 +30,7 @@ import org.mcstats.Metrics;
 import java.io.*;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.logging.Level;
 
 public class QuizMaster3000 extends JavaPlugin {
 
@@ -309,13 +310,16 @@ public class QuizMaster3000 extends JavaPlugin {
     public void checkAnswer(Player player, String message) {
         for (String a : currentQuestion.getAnswer()) {
             if (message.equalsIgnoreCase(a)) {
+                this.getLogger().log(Level.INFO,MessageFormat.format("Question answered by {0}.",player.getName()));
                 getServer().getScheduler().cancelTask(questionRunnable.getID());
                 sendPlayers(MessageFormat.format(messages.getString("quiz.question.playercorrect"), ChatColor.GREEN, player.getName()));
                 scores.put(player, scores.get(player) + 1);
                 if (scores.get(player) == config.getInt("quiz.winningScore")) { //NON-NLS
+                    this.getLogger().log(Level.INFO,"Winning score reached. Quiz stopping.");
                     state = QuizState.FINISHED;
                     finishQuiz();
                 } else {
+                    this.getLogger().log(Level.FINE,"Starting next question runnable.");
                     state = QuizState.WAITFORNEXT;
                     sendPlayers(messages.getString("quiz.question.next"));
                     waitForNextRunnable.start();
