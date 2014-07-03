@@ -319,7 +319,7 @@ public class QuizMaster3000 extends JavaPlugin {
                     state = QuizState.FINISHED;
                     finishQuiz();
                 } else {
-                    this.getLogger().log(Level.FINE,"Starting next question runnable.");
+                    this.getLogger().log(Level.INFO,"Starting next question runnable.");
                     state = QuizState.WAITFORNEXT;
                     sendPlayers(messages.getString("quiz.question.next"));
                     waitForNextRunnable.start();
