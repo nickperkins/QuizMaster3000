@@ -294,7 +294,7 @@ public class QuizMaster3000 extends JavaPlugin {
         Integer thisNumber;
         do {
             thisNumber = ran.nextInt(questions.size());
-        } while (!usedQuestions.contains(thisNumber));
+        } while (usedQuestions.contains(thisNumber));
         usedQuestions.add(thisNumber);
         currentQuestion = questions.get(thisNumber);
 
