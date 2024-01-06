@@ -1,6 +1,8 @@
 QuizMaster3000
 ==============
 
+**This project has not been maintained for many years and has been archived.**
+
 Quiz Plugin for Bukkit servers
 
 This plugin allows you to run quiz contests in game. Questions are loaded from a data file that can be updated with as many questions as you can think of. Questions can have multiple answers.
